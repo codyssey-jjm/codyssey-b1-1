@@ -1,0 +1,29 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="800"
+  height="1000"
+  viewBox="0 0 800 1000"
+  role="img"
+  aria-labelledby="title description"
+>
+  <title id="title">프로필 이미지 자리 표시자</title>
+  <desc id="description">격자와 인물 윤곽으로 구성된 임시 프로필 이미지</desc>
+  <rect width="800" height="1000" fill="#f1f0ea"/>
+  <g fill="none" stroke="#cac8bf" stroke-width="2">
+    <path d="M0 200h800M0 400h800M0 600h800M0 800h800"/>
+    <path d="M200 0v1000M400 0v1000M600 0v1000"/>
+  </g>
+  <circle cx="400" cy="365" r="145" fill="#11110f"/>
+  <path d="M145 885c18-214 112-330 255-330s237 116 255 330" fill="#11110f"/>
+  <rect x="36" y="36" width="190" height="54" fill="#c8ff32"/>
+  <text
+    x="52"
+    y="72"
+    fill="#11110f"
+    font-family="monospace"
+    font-size="22"
+    font-weight="700"
+  >
+    PROFILE / 01
+  </text>
+</svg>
