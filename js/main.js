@@ -3,6 +3,8 @@
 const HEADER_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
 const REVEAL_THRESHOLD = 0.2;
+const TYPING_INTERVAL = 55;
+const TYPING_START_DELAY = 450;
 const THEME_STORAGE_KEY = "portfolio-theme";
 const GITHUB_USERNAME = "jungmyung16";
 const MAX_PROJECT_COUNT = 6;
@@ -17,6 +19,8 @@ const themeLabel = document.querySelector("[data-theme-label]");
 const scrollTopButton = document.querySelector("[data-scroll-top]");
 const anchorLinks = document.querySelectorAll('a[href^="#"]:not(.skip-link)');
 const revealElements = document.querySelectorAll("[data-reveal]");
+const typingElement = document.querySelector("[data-typing]");
+const typingOutput = document.querySelector("[data-typing-output]");
 const contactForm = document.querySelector("[data-contact-form]");
 const formResult = document.querySelector("[data-form-result]");
 const projectStatus = document.querySelector("[data-project-status]");
@@ -49,6 +53,13 @@ const state = {
   isHeaderScrolled: false,
   isScrollTopVisible: false,
   theme: "light",
+};
+
+const typingState = {
+  status: "idle",
+  characters: [],
+  currentIndex: 0,
+  timerId: null,
 };
 
 const formState = {
@@ -339,8 +350,105 @@ const initializeRevealAnimation = () => {
   });
 };
 
+const clearTypingTimer = () => {
+  if (typingState.timerId === null) {
+    return;
+  }
+
+  window.clearTimeout(typingState.timerId);
+  typingState.timerId = null;
+};
+
+const renderTypingText = () => {
+  if (!typingElement || !typingOutput) {
+    return;
+  }
+
+  typingOutput.textContent = typingState.characters
+    .slice(0, typingState.currentIndex)
+    .join("");
+  typingElement.classList.toggle("is-typing", typingState.status === "typing");
+  typingElement.classList.toggle("is-complete", typingState.status === "complete");
+};
+
+const completeTyping = () => {
+  clearTypingTimer();
+  typingState.currentIndex = typingState.characters.length;
+  typingState.status = "complete";
+  renderTypingText();
+};
+
+const typeNextCharacter = () => {
+  typingState.timerId = null;
+
+  if (typingState.status !== "typing") {
+    return;
+  }
+
+  typingState.currentIndex += 1;
+
+  if (typingState.currentIndex >= typingState.characters.length) {
+    completeTyping();
+    return;
+  }
+
+  renderTypingText();
+  typingState.timerId = window.setTimeout(typeNextCharacter, TYPING_INTERVAL);
+};
+
+const startTyping = () => {
+  typingState.timerId = null;
+
+  if (typingState.status !== "idle") {
+    return;
+  }
+
+  if (reducedMotionQuery.matches) {
+    completeTyping();
+    return;
+  }
+
+  typingState.status = "typing";
+  typingState.currentIndex = 0;
+  renderTypingText();
+  typingState.timerId = window.setTimeout(typeNextCharacter, TYPING_INTERVAL);
+};
+
+const initializeTypingEffect = () => {
+  if (
+    !typingElement ||
+    !typingOutput ||
+    typingState.status !== "idle" ||
+    typingState.timerId !== null
+  ) {
+    return;
+  }
+
+  const fullText = typingOutput.textContent.trim();
+
+  if (!fullText) {
+    return;
+  }
+
+  typingState.characters = [...fullText];
+
+  if (reducedMotionQuery.matches) {
+    completeTyping();
+    return;
+  }
+
+  typingState.timerId = window.setTimeout(startTyping, TYPING_START_DELAY);
+};
+
 renderScrollState();
 initializeRevealAnimation();
+initializeTypingEffect();
+
+reducedMotionQuery.addEventListener("change", ({ matches }) => {
+  if (matches && typingState.status !== "complete") {
+    completeTyping();
+  }
+});
 
 const getFieldValue = (name) => formFields[name]?.value.trim() ?? "";
 
