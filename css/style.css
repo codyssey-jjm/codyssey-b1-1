@@ -731,9 +731,19 @@ textarea {
 
 .projects__state {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-6);
+}
+
+.projects__state p {
+  max-width: 52rem;
+}
+
+.projects__state .button:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .projects__state::before {
@@ -786,6 +796,10 @@ textarea {
   margin-top: var(--space-8);
 }
 
+.projects__grid:empty {
+  display: none;
+}
+
 .project-card {
   display: flex;
   min-width: 0;
@@ -812,6 +826,21 @@ textarea {
   color: var(--color-accent-text);
   font-family: var(--font-display);
   font-size: clamp(3.5rem, 12vw, 6rem);
+}
+
+.project-card__cover::before {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, currentColor 1px, transparent 1px),
+    linear-gradient(to bottom, currentColor 1px, transparent 1px);
+  background-size: 3rem 3rem;
+  opacity: 0.12;
+  content: "";
+}
+
+.project-card__cover span {
+  position: relative;
 }
 
 .project-card:nth-child(3n + 2) .project-card__cover {
@@ -842,7 +871,7 @@ textarea {
 }
 
 .project-card__title {
-  margin-top: var(--space-4);
+  margin: var(--space-4) 0 0;
   overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: 1.65rem;
@@ -852,6 +881,7 @@ textarea {
 
 .project-card__description {
   margin-block: var(--space-4) var(--space-8);
+  overflow-wrap: anywhere;
   color: var(--color-muted);
 }
 
@@ -862,6 +892,9 @@ textarea {
 }
 
 .project-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
   font-weight: 600;
 }
 
