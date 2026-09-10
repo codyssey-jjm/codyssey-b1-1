@@ -1039,18 +1039,9 @@ textarea {
 }
 
 .contact-form {
-  position: relative;
   display: grid;
   gap: var(--space-8);
   align-content: start;
-}
-
-.form-honeypot {
-  position: absolute;
-  left: -100vw;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
 }
 
 .form-field {
