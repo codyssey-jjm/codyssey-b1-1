@@ -23,6 +23,7 @@ const typingElement = document.querySelector("[data-typing]");
 const typingOutput = document.querySelector("[data-typing-output]");
 const contactForm = document.querySelector("[data-contact-form]");
 const formResult = document.querySelector("[data-form-result]");
+const formSubmitButton = document.querySelector("[data-form-submit]");
 const projectStatus = document.querySelector("[data-project-status]");
 const projectStatusMessage = document.querySelector("[data-project-status-message]");
 const projectList = document.querySelector("[data-project-list]");
@@ -79,7 +80,8 @@ const formState = {
     message: false,
   },
   hasSubmitted: false,
-  isSuccessful: false,
+  submissionStatus: "idle",
+  submissionMessage: "",
 };
 
 const projectState = {
@@ -502,24 +504,109 @@ const renderFormErrors = () => {
   });
 };
 
+const FORM_RESULT_CLASSES = ["is-submitting", "is-success", "is-error"];
+
 const renderFormResult = () => {
   if (!formResult) {
     return;
   }
 
-  formResult.hidden = !formState.isSuccessful;
-  formResult.textContent = formState.isSuccessful
-    ? "입력 내용이 확인되었습니다. 현재는 실제 전송 기능이 연결되어 있지 않습니다."
-    : "";
+  FORM_RESULT_CLASSES.forEach((className) => {
+    formResult.classList.remove(className);
+  });
+
+  const hasResult = formState.submissionStatus !== "idle";
+  const statusClass = `is-${formState.submissionStatus}`;
+
+  formResult.hidden = !hasResult;
+  formResult.textContent = hasResult ? formState.submissionMessage : "";
+
+  if (FORM_RESULT_CLASSES.includes(statusClass)) {
+    formResult.classList.add(statusClass);
+  }
 };
 
-const clearSuccessfulState = () => {
-  if (!formState.isSuccessful) {
+const renderFormSubmitButton = () => {
+  if (!formSubmitButton) {
     return;
   }
 
-  formState.isSuccessful = false;
+  const isSubmitting = formState.submissionStatus === "submitting";
+  const buttonLabels = {
+    idle: "메시지 보내기",
+    submitting: "전송 중...",
+    success: "메시지 보내기",
+    error: "다시 보내기",
+  };
+
+  formSubmitButton.disabled = isSubmitting;
+  formSubmitButton.setAttribute("aria-disabled", String(isSubmitting));
+  formSubmitButton.textContent = buttonLabels[formState.submissionStatus] ?? "메시지 보내기";
+  contactForm?.setAttribute("aria-busy", String(isSubmitting));
+};
+
+const renderFormSubmission = () => {
   renderFormResult();
+  renderFormSubmitButton();
+};
+
+const clearSubmissionState = () => {
+  if (
+    formState.submissionStatus === "idle" ||
+    formState.submissionStatus === "submitting"
+  ) {
+    return;
+  }
+
+  formState.submissionStatus = "idle";
+  formState.submissionMessage = "";
+  renderFormSubmission();
+};
+
+const resetFormValidation = () => {
+  contactForm?.reset();
+  formState.values = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, ""]));
+  formState.errors = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, ""]));
+  formState.touched = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, false]));
+  formState.hasSubmitted = false;
+  renderFormErrors();
+};
+
+const isValidFormspreeEndpoint = () => {
+  if (!contactForm) {
+    return false;
+  }
+
+  try {
+    const endpoint = new URL(contactForm.action);
+    return (
+      endpoint.protocol === "https:" &&
+      endpoint.hostname === "formspree.io" &&
+      /^\/f\/[a-z0-9]+$/i.test(endpoint.pathname)
+    );
+  } catch {
+    return false;
+  }
+};
+
+const submitContactForm = async () => {
+  const formData = new FormData(contactForm);
+
+  FORM_FIELD_NAMES.forEach((name) => {
+    formData.set(name, formState.values[name]);
+  });
+
+  const response = await fetch(contactForm.action, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Accept: "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Formspree request failed: ${response.status}`);
+  }
 };
 
 FORM_FIELD_NAMES.forEach((name) => {
@@ -531,7 +618,7 @@ FORM_FIELD_NAMES.forEach((name) => {
 
   field.addEventListener("input", () => {
     formState.values[name] = getFieldValue(name);
-    clearSuccessfulState();
+    clearSubmissionState();
 
     if (formState.touched[name] || formState.hasSubmitted) {
       formState.errors[name] = validateField(name, formState.values[name]);
@@ -547,8 +634,12 @@ FORM_FIELD_NAMES.forEach((name) => {
   });
 });
 
-contactForm?.addEventListener("submit", (event) => {
+contactForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  if (formState.submissionStatus === "submitting") {
+    return;
+  }
 
   formState.hasSubmitted = true;
   formState.values = collectFormValues();
@@ -563,14 +654,37 @@ contactForm?.addEventListener("submit", (event) => {
   const firstInvalidFieldName = FORM_FIELD_NAMES.find((name) => formState.errors[name]);
 
   if (firstInvalidFieldName) {
-    formState.isSuccessful = false;
-    renderFormResult();
+    formState.submissionStatus = "idle";
+    formState.submissionMessage = "";
+    renderFormSubmission();
     formFields[firstInvalidFieldName]?.focus();
     return;
   }
 
-  formState.isSuccessful = true;
-  renderFormResult();
+  if (!isValidFormspreeEndpoint()) {
+    formState.submissionStatus = "error";
+    formState.submissionMessage = "문의 폼의 전송 설정이 필요합니다.";
+    renderFormSubmission();
+    formResult?.focus();
+    return;
+  }
+
+  formState.submissionStatus = "submitting";
+  formState.submissionMessage = "메시지를 전송하고 있습니다.";
+  renderFormSubmission();
+
+  try {
+    await submitContactForm();
+    resetFormValidation();
+    formState.submissionStatus = "success";
+    formState.submissionMessage = "메시지가 전송되었습니다. 확인 후 연락드리겠습니다.";
+  } catch {
+    formState.submissionStatus = "error";
+    formState.submissionMessage =
+      "메시지를 전송하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  }
+
+  renderFormSubmission();
   formResult?.focus();
 });
 
