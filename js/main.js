@@ -23,11 +23,13 @@ const projectStatus = document.querySelector("[data-project-status]");
 const projectStatusMessage = document.querySelector("[data-project-status-message]");
 const projectList = document.querySelector("[data-project-list]");
 const projectRetryButton = document.querySelector("[data-project-retry]");
+const projectFilters = document.querySelector("[data-project-filters]");
 const desktopMediaQuery = window.matchMedia("(min-width: 64rem)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const FORM_FIELD_NAMES = ["name", "email", "message"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALL_PROJECT_LANGUAGES = "all";
 const PROJECT_STATUS_CLASSES = ["is-loading", "is-success", "is-empty", "is-error"];
 const HTML_ESCAPE_CHARACTERS = {
   "&": "&amp;",
@@ -73,6 +75,7 @@ const projectState = {
   status: "idle",
   repositories: [],
   errorType: null,
+  selectedLanguage: ALL_PROJECT_LANGUAGES,
 };
 
 const formFields = Object.fromEntries(
@@ -487,11 +490,28 @@ const prepareRepositories = (repositories) =>
     .filter(({ fork, archived }) => !fork && !archived)
     .slice(0, MAX_PROJECT_COUNT);
 
+const getProjectLanguage = ({ language }) =>
+  typeof language === "string" && language.trim() ? language.trim() : "Other";
+
+const getProjectLanguages = () =>
+  [...new Set(projectState.repositories.map(getProjectLanguage))].sort((first, second) =>
+    first.localeCompare(second, "en", { sensitivity: "base" }),
+  );
+
+const getFilteredRepositories = () => {
+  if (projectState.selectedLanguage === ALL_PROJECT_LANGUAGES) {
+    return projectState.repositories;
+  }
+
+  return projectState.repositories.filter(
+    (repository) => getProjectLanguage(repository) === projectState.selectedLanguage,
+  );
+};
+
 const createProjectCard = (repository) => {
   const {
     name = "Untitled",
     description,
-    language,
     stargazers_count: starCount = 0,
     updated_at: updatedAt,
     html_url: htmlUrl,
@@ -499,7 +519,7 @@ const createProjectCard = (repository) => {
 
   const projectName = String(name).trim() || "Untitled";
   const projectDescription = description || "프로젝트 설명이 아직 등록되지 않았습니다.";
-  const projectLanguage = language || "Other";
+  const projectLanguage = getProjectLanguage(repository);
   const projectInitial = [...projectName][0]?.toUpperCase() ?? "?";
   const projectUrl = getSafeGitHubUrl(htmlUrl);
   const formattedStarCount = Number.isFinite(starCount) ? starCount : 0;
@@ -540,7 +560,17 @@ const getProjectStatusMessage = () => {
   }
 
   if (projectState.status === "success") {
-    return `${projectState.repositories.length}개의 프로젝트를 불러왔습니다.`;
+    const filteredRepositories = getFilteredRepositories();
+
+    if (filteredRepositories.length === 0) {
+      return "선택한 언어에 해당하는 프로젝트가 없습니다.";
+    }
+
+    if (projectState.selectedLanguage === ALL_PROJECT_LANGUAGES) {
+      return `${filteredRepositories.length}개의 프로젝트를 불러왔습니다.`;
+    }
+
+    return `${projectState.selectedLanguage} 프로젝트 ${filteredRepositories.length}개를 표시하고 있습니다.`;
   }
 
   if (projectState.status === "empty") {
@@ -594,12 +624,72 @@ const renderProjectList = () => {
   projectList.setAttribute("aria-busy", String(projectState.status === "loading"));
   projectList.innerHTML =
     projectState.status === "success"
-      ? projectState.repositories.map((repository) => createProjectCard(repository)).join("")
+      ? getFilteredRepositories().map((repository) => createProjectCard(repository)).join("")
       : "";
+};
+
+const createProjectFilterButton = (language, count) => {
+  const button = document.createElement("button");
+  const label = document.createElement("span");
+  const countBadge = document.createElement("span");
+  const isAllLanguages = language === ALL_PROJECT_LANGUAGES;
+  const displayLanguage = isAllLanguages ? "All" : language;
+  const isActive = projectState.selectedLanguage === language;
+
+  button.className = "project-filter";
+  button.type = "button";
+  button.dataset.projectFilter = language;
+  button.classList.toggle("is-active", isActive);
+  button.setAttribute("aria-pressed", String(isActive));
+  button.setAttribute("aria-label", `${displayLanguage} 프로젝트 ${count}개`);
+
+  label.className = "project-filter__label";
+  label.textContent = displayLanguage;
+
+  countBadge.className = "project-filter__count";
+  countBadge.textContent = String(count);
+  countBadge.setAttribute("aria-hidden", "true");
+
+  button.append(label, countBadge);
+  return button;
+};
+
+const renderProjectFilters = () => {
+  if (!projectFilters) {
+    return;
+  }
+
+  const shouldShowFilters =
+    projectState.status === "success" && projectState.repositories.length > 0;
+
+  projectFilters.hidden = !shouldShowFilters;
+  projectFilters.replaceChildren();
+
+  if (!shouldShowFilters) {
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  const languages = getProjectLanguages();
+
+  fragment.append(
+    createProjectFilterButton(ALL_PROJECT_LANGUAGES, projectState.repositories.length),
+  );
+
+  languages.forEach((language) => {
+    const projectCount = projectState.repositories.filter(
+      (repository) => getProjectLanguage(repository) === language,
+    ).length;
+
+    fragment.append(createProjectFilterButton(language, projectCount));
+  });
+
+  projectFilters.append(fragment);
 };
 
 const renderProjects = () => {
   renderProjectStatus();
+  renderProjectFilters();
   renderProjectList();
 };
 
@@ -623,6 +713,7 @@ const loadProjects = async () => {
   projectState.status = "loading";
   projectState.repositories = [];
   projectState.errorType = null;
+  projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
   renderProjects();
 
   try {
@@ -654,6 +745,40 @@ const loadProjects = async () => {
     renderProjects();
   }
 };
+
+projectFilters?.addEventListener("click", (event) => {
+  if (!(event.target instanceof Element)) {
+    return;
+  }
+
+  const filterButton = event.target.closest("[data-project-filter]");
+
+  if (!filterButton || !projectFilters.contains(filterButton)) {
+    return;
+  }
+
+  const { projectFilter } = filterButton.dataset;
+
+  if (!projectFilter || projectFilter === projectState.selectedLanguage) {
+    return;
+  }
+
+  const isKnownLanguage =
+    projectFilter === ALL_PROJECT_LANGUAGES || getProjectLanguages().includes(projectFilter);
+
+  if (!isKnownLanguage) {
+    return;
+  }
+
+  projectState.selectedLanguage = projectFilter;
+  renderProjects();
+
+  const activeFilterButton = [...projectFilters.querySelectorAll("[data-project-filter]")].find(
+    (button) => button.dataset.projectFilter === projectState.selectedLanguage,
+  );
+
+  activeFilterButton?.focus();
+});
 
 projectRetryButton?.addEventListener("click", loadProjects);
 loadProjects();
