@@ -31,6 +31,7 @@ const projectRetryButton = document.querySelector("[data-project-retry]");
 const projectFilters = document.querySelector("[data-project-filters]");
 const desktopMediaQuery = window.matchMedia("(min-width: 64rem)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+const systemThemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 const FORM_FIELD_NAMES = ["name", "email", "message"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,6 +55,7 @@ const state = {
   isHeaderScrolled: false,
   isScrollTopVisible: false,
   theme: "light",
+  themeSource: "system",
 };
 
 const typingState = {
@@ -285,6 +287,24 @@ const getStoredTheme = () => {
   }
 };
 
+const getSystemTheme = () => (systemThemeQuery.matches ? "dark" : "light");
+
+const getInitialTheme = () => {
+  const storedTheme = getStoredTheme();
+
+  if (storedTheme) {
+    return {
+      theme: storedTheme,
+      source: "user",
+    };
+  }
+
+  return {
+    theme: getSystemTheme(),
+    source: "system",
+  };
+};
+
 const saveTheme = (theme) => {
   try {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -308,12 +328,24 @@ const renderTheme = (theme) => {
   }
 };
 
-renderTheme(getStoredTheme() ?? "light");
+const { theme: initialTheme, source: initialThemeSource } = getInitialTheme();
+
+state.themeSource = initialThemeSource;
+renderTheme(initialTheme);
 
 themeToggle?.addEventListener("click", () => {
   const nextTheme = state.theme === "dark" ? "light" : "dark";
+  state.themeSource = "user";
   renderTheme(nextTheme);
   saveTheme(nextTheme);
+});
+
+systemThemeQuery.addEventListener("change", ({ matches }) => {
+  if (state.themeSource !== "system") {
+    return;
+  }
+
+  renderTheme(matches ? "dark" : "light");
 });
 
 const showRevealElementsImmediately = () => {

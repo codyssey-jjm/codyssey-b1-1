@@ -53,6 +53,21 @@
   --color-contact-success: #11663d;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #10100f;
+    --color-surface: #1b1b18;
+    --color-text: #f2f0e8;
+    --color-muted: #aaa89f;
+    --color-line: #44433e;
+    --color-error: #ff7166;
+    --color-success: #65d89c;
+    --color-contact-error: #a82f27;
+    --color-contact-success: #11663d;
+  }
+}
+
 *,
 *::before,
 *::after {
