@@ -14,8 +14,13 @@ const themeLabel = document.querySelector("[data-theme-label]");
 const scrollTopButton = document.querySelector("[data-scroll-top]");
 const anchorLinks = document.querySelectorAll('a[href^="#"]:not(.skip-link)');
 const revealElements = document.querySelectorAll("[data-reveal]");
+const contactForm = document.querySelector("[data-contact-form]");
+const formResult = document.querySelector("[data-form-result]");
 const desktopMediaQuery = window.matchMedia("(min-width: 64rem)");
 const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+const FORM_FIELD_NAMES = ["name", "email", "message"];
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const state = {
   isMenuOpen: false,
@@ -23,6 +28,37 @@ const state = {
   isScrollTopVisible: false,
   theme: "light",
 };
+
+const formState = {
+  values: {
+    name: "",
+    email: "",
+    message: "",
+  },
+  errors: {
+    name: "",
+    email: "",
+    message: "",
+  },
+  touched: {
+    name: false,
+    email: false,
+    message: false,
+  },
+  hasSubmitted: false,
+  isSuccessful: false,
+};
+
+const formFields = Object.fromEntries(
+  FORM_FIELD_NAMES.map((name) => [name, contactForm?.elements.namedItem(name) ?? null]),
+);
+
+const formErrorElements = Object.fromEntries(
+  FORM_FIELD_NAMES.map((name) => [
+    name,
+    contactForm?.querySelector(`[data-error-for="${name}"]`) ?? null,
+  ]),
+);
 
 const getFocusableHeaderElements = () => {
   if (!siteHeader) {
@@ -276,3 +312,127 @@ const initializeRevealAnimation = () => {
 
 renderScrollState();
 initializeRevealAnimation();
+
+const getFieldValue = (name) => formFields[name]?.value.trim() ?? "";
+
+const collectFormValues = () =>
+  Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, getFieldValue(name)]));
+
+const validateField = (name, value) => {
+  if (!value) {
+    const requiredMessages = {
+      name: "이름을 입력해 주세요.",
+      email: "이메일을 입력해 주세요.",
+      message: "메시지를 입력해 주세요.",
+    };
+
+    return requiredMessages[name] ?? "필수 입력값을 입력해 주세요.";
+  }
+
+  if (name === "email" && !EMAIL_PATTERN.test(value)) {
+    return "올바른 이메일 형식으로 입력해 주세요.";
+  }
+
+  return "";
+};
+
+const validateForm = (values) =>
+  Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, validateField(name, values[name])]));
+
+const renderFieldError = (name) => {
+  const field = formFields[name];
+  const errorElement = formErrorElements[name];
+  const errorMessage = formState.errors[name];
+  const shouldShowError = formState.touched[name] || formState.hasSubmitted;
+  const visibleError = shouldShowError ? errorMessage : "";
+
+  if (!field || !errorElement) {
+    return;
+  }
+
+  errorElement.textContent = visibleError;
+
+  if (visibleError) {
+    field.setAttribute("aria-invalid", "true");
+  } else {
+    field.removeAttribute("aria-invalid");
+  }
+};
+
+const renderFormErrors = () => {
+  FORM_FIELD_NAMES.forEach((name) => {
+    renderFieldError(name);
+  });
+};
+
+const renderFormResult = () => {
+  if (!formResult) {
+    return;
+  }
+
+  formResult.hidden = !formState.isSuccessful;
+  formResult.textContent = formState.isSuccessful
+    ? "입력 내용이 확인되었습니다. 현재는 실제 전송 기능이 연결되어 있지 않습니다."
+    : "";
+};
+
+const clearSuccessfulState = () => {
+  if (!formState.isSuccessful) {
+    return;
+  }
+
+  formState.isSuccessful = false;
+  renderFormResult();
+};
+
+FORM_FIELD_NAMES.forEach((name) => {
+  const field = formFields[name];
+
+  if (!field) {
+    return;
+  }
+
+  field.addEventListener("input", () => {
+    formState.values[name] = getFieldValue(name);
+    clearSuccessfulState();
+
+    if (formState.touched[name] || formState.hasSubmitted) {
+      formState.errors[name] = validateField(name, formState.values[name]);
+      renderFieldError(name);
+    }
+  });
+
+  field.addEventListener("blur", () => {
+    formState.touched[name] = true;
+    formState.values[name] = getFieldValue(name);
+    formState.errors[name] = validateField(name, formState.values[name]);
+    renderFieldError(name);
+  });
+});
+
+contactForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  formState.hasSubmitted = true;
+  formState.values = collectFormValues();
+  formState.errors = validateForm(formState.values);
+
+  FORM_FIELD_NAMES.forEach((name) => {
+    formState.touched[name] = true;
+  });
+
+  renderFormErrors();
+
+  const firstInvalidFieldName = FORM_FIELD_NAMES.find((name) => formState.errors[name]);
+
+  if (firstInvalidFieldName) {
+    formState.isSuccessful = false;
+    renderFormResult();
+    formFields[firstInvalidFieldName]?.focus();
+    return;
+  }
+
+  formState.isSuccessful = true;
+  renderFormResult();
+  formResult?.focus();
+});

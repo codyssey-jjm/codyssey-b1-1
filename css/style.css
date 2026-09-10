@@ -9,6 +9,8 @@
   --color-accent-text: #11110f;
   --color-error: #c93d32;
   --color-success: #19764a;
+  --color-contact-error: #ff8b80;
+  --color-contact-success: #65d89c;
   --color-cyan: #4bd8cc;
   --color-orange: #ff623d;
 
@@ -47,6 +49,8 @@
   --color-line: #44433e;
   --color-error: #ff7166;
   --color-success: #65d89c;
+  --color-contact-error: #a82f27;
+  --color-contact-success: #11663d;
 }
 
 *,
@@ -949,13 +953,19 @@ textarea {
 
 .form-field input[aria-invalid="true"],
 .form-field textarea[aria-invalid="true"] {
-  border-color: var(--color-error);
+  border-bottom-width: 0.125rem;
+  border-color: var(--color-contact-error);
+}
+
+.form-field:has(input[aria-invalid="true"]) label,
+.form-field:has(textarea[aria-invalid="true"]) label {
+  color: var(--color-contact-error);
 }
 
 .form-field__error {
   min-height: 1.35rem;
   margin-top: var(--space-2);
-  color: var(--color-error);
+  color: var(--color-contact-error);
   font-size: 0.78rem;
 }
 
@@ -967,9 +977,14 @@ textarea {
 }
 
 .contact-form__result {
-  border-left: 0.3rem solid var(--color-success);
+  border-left: 0.3rem solid var(--color-contact-success);
   padding: var(--space-3) var(--space-4);
-  background: color-mix(in srgb, var(--color-success) 15%, transparent);
+  background: color-mix(in srgb, var(--color-contact-success) 18%, transparent);
+  color: inherit;
+}
+
+.contact-form__result:focus-visible {
+  outline-color: var(--color-contact-success);
 }
 
 /* Footer */
