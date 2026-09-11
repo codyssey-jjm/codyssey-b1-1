@@ -1,0 +1,41 @@
+/* 푸터 링크와 서명 */
+.site-footer {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  overflow: hidden;
+  border-top: 0.125rem solid var(--color-text);
+  padding-block: var(--space-8) var(--space-24);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.site-footer__signature {
+  position: absolute;
+  right: var(--page-gutter);
+  bottom: -0.25em;
+  max-width: 100%;
+  color: transparent;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 14vw, 8rem);
+  letter-spacing: -0.07em;
+  line-height: 0.7;
+  white-space: nowrap;
+  -webkit-text-stroke: 0.025em var(--color-text);
+}
+
+/* 태블릿 레이아웃 */
+@media (min-width: 48rem) {
+  .site-footer {
+    grid-template-columns: repeat(3, auto);
+    align-items: start;
+    justify-content: space-between;
+  }
+}

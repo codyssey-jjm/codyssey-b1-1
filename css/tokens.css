@@ -1,0 +1,88 @@
+/* 테마·글꼴·간격 변수와 반응형 기준 */
+:root {
+  color-scheme: light;
+  --color-bg: #f1f0ea;
+  --color-surface: #fbfaf6;
+  --color-text: #11110f;
+  --color-muted: #66655f;
+  --color-line: #cac8bf;
+  --color-accent: #c8ff32;
+  --color-accent-text: #11110f;
+  --color-error: #c93d32;
+  --color-success: #19764a;
+  --color-contact-error: #ff8b80;
+  --color-contact-success: #65d89c;
+  --color-cyan: #4bd8cc;
+  --color-orange: #ff623d;
+
+  --font-display: "Archivo Black", "IBM Plex Sans KR", sans-serif;
+  --font-body: "IBM Plex Sans KR", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --page-gutter: 1.25rem;
+  --content-width: 90rem;
+  --header-height: 4.5rem;
+  --section-space: 5rem;
+  --border: 1px solid var(--color-line);
+  --shadow-hard: 0.5rem 0.5rem 0 var(--color-text);
+  --transition-fast: 180ms;
+  --transition-panel: 380ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #10100f;
+  --color-surface: #1b1b18;
+  --color-text: #f2f0e8;
+  --color-muted: #aaa89f;
+  --color-line: #44433e;
+  --color-error: #ff7166;
+  --color-success: #65d89c;
+  --color-contact-error: #a82f27;
+  --color-contact-success: #11663d;
+}
+
+/* 명시적 테마 설정 전 시스템 다크 모드 대체값 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --color-bg: #10100f;
+    --color-surface: #1b1b18;
+    --color-text: #f2f0e8;
+    --color-muted: #aaa89f;
+    --color-line: #44433e;
+    --color-error: #ff7166;
+    --color-success: #65d89c;
+    --color-contact-error: #a82f27;
+    --color-contact-success: #11663d;
+  }
+}
+
+/* 태블릿 레이아웃 */
+@media (min-width: 48rem) {
+  :root {
+    --page-gutter: 2.5rem;
+    --section-space: 7rem;
+  }
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 64rem) {
+  :root {
+    --page-gutter: clamp(3rem, 6vw, 6rem);
+    --header-height: 5rem;
+    --section-space: 9rem;
+  }
+}

@@ -1,0 +1,219 @@
+/* 헤더·내비게이션·테마 토글과 모바일 메뉴 */
+body.menu-open {
+  overflow: hidden;
+}
+
+.site-header {
+  position: fixed;
+  z-index: 50;
+  top: 0;
+  right: 0;
+  left: 0;
+  min-width: 20rem;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--transition-panel) ease,
+    border-color var(--transition-panel) ease,
+    backdrop-filter var(--transition-panel) ease;
+}
+
+.site-header.is-scrolled {
+  border-color: var(--color-line);
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  backdrop-filter: blur(0.75rem);
+}
+
+.site-nav {
+  display: flex;
+  min-height: var(--header-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.site-nav__logo {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.site-nav__logo span {
+  margin-right: 0.15em;
+  color: var(--color-accent-text);
+  text-shadow:
+    0.08em 0 var(--color-accent),
+    -0.08em 0 var(--color-accent);
+}
+
+.site-nav__menu {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  visibility: hidden;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: calc(var(--header-height) + var(--space-8)) var(--page-gutter) var(--space-8);
+  transform: translateY(-1rem);
+  background: var(--color-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    visibility var(--transition-panel),
+    opacity var(--transition-panel) ease,
+    transform var(--transition-panel) var(--ease-out);
+}
+
+.site-nav__menu.active {
+  visibility: visible;
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.site-nav__menu a {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  border-top: var(--border);
+  padding-block: var(--space-4);
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 14vw, 4.5rem);
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.site-nav__menu a span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0;
+}
+
+.site-nav__actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.theme-toggle,
+.menu-toggle {
+  display: inline-flex;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: var(--border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast) ease,
+    color var(--transition-fast) ease,
+    border-color var(--transition-fast) ease;
+}
+
+.theme-toggle {
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.theme-toggle__icon {
+  font-size: 1rem;
+}
+
+.menu-toggle {
+  position: relative;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.menu-toggle span {
+  width: 1.2rem;
+  height: 0.125rem;
+  background: currentColor;
+  transition: transform var(--transition-panel) var(--ease-out);
+}
+
+.menu-toggle.active span:first-child {
+  transform: translateY(0.235rem) rotate(45deg);
+}
+
+.menu-toggle.active span:last-child {
+  transform: translateY(-0.235rem) rotate(-45deg);
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 64rem) {
+  .site-nav__menu {
+    position: static;
+    display: flex;
+    visibility: visible;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: clamp(1rem, 2.5vw, 2.5rem);
+    margin-left: auto;
+    padding: 0;
+    transform: none;
+    background: transparent;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .site-nav__menu a {
+    position: relative;
+    gap: var(--space-2);
+    border: 0;
+    padding-block: var(--space-2);
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .site-nav__menu a::after {
+    position: absolute;
+    z-index: -1;
+    right: 0;
+    bottom: 0.35rem;
+    left: 0;
+    height: 0.35rem;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: var(--color-accent);
+    content: "";
+    transition: transform var(--transition-fast) var(--ease-out);
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+}
+
+/* hover 지원 환경의 상호작용 */
+@media (hover: hover) {
+  .theme-toggle:hover,
+  .menu-toggle:hover {
+    border-color: var(--color-text);
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+
+  .site-nav__menu a:hover::after,
+  .site-nav__menu a:focus-visible::after {
+    transform: scaleX(1);
+  }
+}
