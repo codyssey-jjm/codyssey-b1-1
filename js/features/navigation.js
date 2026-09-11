@@ -1,3 +1,5 @@
+import { getScrollBehavior } from "../shared/motion.js";
+
 // 모바일 메뉴와 페이지 내부 앵커 이동 관리
 export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
   const siteHeader = document.querySelector("[data-header]");
@@ -94,9 +96,6 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     }
   });
 
-  // 모션 감소 설정에 따른 스크롤 방식 결정
-  const getScrollBehavior = () => (reducedMotionQuery.matches ? "auto" : "smooth");
-
   // 유효한 페이지 내부 링크의 부드러운 이동
   anchorLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -119,7 +118,7 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
       }
 
       target.scrollIntoView({
-        behavior: getScrollBehavior(),
+        behavior: getScrollBehavior(reducedMotionQuery),
         block: "start",
       });
     });

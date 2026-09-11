@@ -1,6 +1,10 @@
 import { FORM_FIELD_NAMES, validateField, validateForm } from "./validation.js";
 import { isValidFormspreeEndpoint, sendContactMessage } from "../../services/formspree.js";
 
+// 폼 초기화와 재설정에 사용할 독립적인 필드 상태 객체 생성
+const createFieldState = (initialValue) =>
+  Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, initialValue]));
+
 // 문의 폼의 입력·검증·전송 상태 관리
 export const initContact = () => {
   const contactForm = document.querySelector("[data-contact-form]");
@@ -13,21 +17,9 @@ export const initContact = () => {
 
   // 입력값과 검증 결과 및 전송 진행 상태
   const formState = {
-    values: {
-      name: "",
-      email: "",
-      message: "",
-    },
-    errors: {
-      name: "",
-      email: "",
-      message: "",
-    },
-    touched: {
-      name: false,
-      email: false,
-      message: false,
-    },
+    values: createFieldState(""),
+    errors: createFieldState(""),
+    touched: createFieldState(false),
     hasSubmitted: false,
     submissionStatus: "idle",
     submissionMessage: "",
@@ -143,9 +135,9 @@ export const initContact = () => {
   // 전송 성공 이후 입력값과 검증 상태 초기화
   const resetFormValidation = () => {
     contactForm?.reset();
-    formState.values = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, ""]));
-    formState.errors = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, ""]));
-    formState.touched = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, false]));
+    formState.values = createFieldState("");
+    formState.errors = createFieldState("");
+    formState.touched = createFieldState(false);
     formState.hasSubmitted = false;
     renderFormErrors();
   };

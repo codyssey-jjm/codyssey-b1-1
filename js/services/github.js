@@ -1,5 +1,6 @@
 // GitHub 저장소 요청 설정
-export const GITHUB_USERNAME = "jungmyung16";
+const GITHUB_USERNAME = "jungmyung16";
+export const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
 const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&direction=desc&per_page=12&type=owner`;
 
 // GitHub 저장소 원본 목록 요청과 응답 형식 검증

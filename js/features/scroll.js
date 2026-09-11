@@ -1,3 +1,5 @@
+import { getScrollBehavior } from "../shared/motion.js";
+
 // 헤더 배경과 스크롤 탑 버튼의 표시 기준
 const HEADER_SCROLL_THRESHOLD = 60;
 const SCROLL_TOP_THRESHOLD = 300;
@@ -16,7 +18,6 @@ export const initScroll = ({ reducedMotionQuery }) => {
     isHeaderScrolled: false,
     isScrollTopVisible: false,
   };
-  const getScrollBehavior = () => (reducedMotionQuery.matches ? "auto" : "smooth");
 
   // 연속 스크롤 처리와 버튼 종료 애니메이션 제어값
   let scrollFrameId = null;
@@ -87,7 +88,7 @@ export const initScroll = ({ reducedMotionQuery }) => {
   scrollTopButton?.addEventListener("click", () => {
     window.scrollTo({
       top: 0,
-      behavior: getScrollBehavior(),
+      behavior: getScrollBehavior(reducedMotionQuery),
     });
   });
 
