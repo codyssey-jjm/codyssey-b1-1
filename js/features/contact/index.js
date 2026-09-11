@@ -1,6 +1,7 @@
 import { FORM_FIELD_NAMES, validateField, validateForm } from "./validation.js";
 import { isValidFormspreeEndpoint, sendContactMessage } from "../../services/formspree.js";
 
+// 문의 폼의 입력·검증·전송 상태 관리
 export const initContact = () => {
   const contactForm = document.querySelector("[data-contact-form]");
   const formResult = document.querySelector("[data-form-result]");
@@ -10,6 +11,7 @@ export const initContact = () => {
     return;
   }
 
+  // 입력값과 검증 결과 및 전송 진행 상태
   const formState = {
     values: {
       name: "",
@@ -31,6 +33,7 @@ export const initContact = () => {
     submissionMessage: "",
   };
 
+  // 필드 이름 기준 입력 요소와 오류 요소 연결
   const formFields = Object.fromEntries(
     FORM_FIELD_NAMES.map((name) => [name, contactForm?.elements.namedItem(name) ?? null]),
   );
@@ -44,9 +47,11 @@ export const initContact = () => {
 
   const getFieldValue = (name) => formFields[name]?.value.trim() ?? "";
 
+  // 전송할 공백 제거 입력값 수집
   const collectFormValues = () =>
     Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, getFieldValue(name)]));
 
+  // 필드 접근성 속성과 오류 문구 갱신
   const renderFieldError = (name) => {
     const field = formFields[name];
     const errorElement = formErrorElements[name];
@@ -75,6 +80,7 @@ export const initContact = () => {
 
   const FORM_RESULT_CLASSES = ["is-submitting", "is-success", "is-error"];
 
+  // 전송 결과 문구와 상태 클래스 갱신
   const renderFormResult = () => {
     if (!formResult) {
       return;
@@ -95,6 +101,7 @@ export const initContact = () => {
     }
   };
 
+  // 중복 제출 방지와 버튼 문구 갱신
   const renderFormSubmitButton = () => {
     if (!formSubmitButton) {
       return;
@@ -119,6 +126,7 @@ export const initContact = () => {
     renderFormSubmitButton();
   };
 
+  // 새 입력 시작 시 이전 성공·오류 상태 제거
   const clearSubmissionState = () => {
     if (
       formState.submissionStatus === "idle" ||
@@ -132,6 +140,7 @@ export const initContact = () => {
     renderFormSubmission();
   };
 
+  // 전송 성공 이후 입력값과 검증 상태 초기화
   const resetFormValidation = () => {
     contactForm?.reset();
     formState.values = Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, ""]));
@@ -141,6 +150,7 @@ export const initContact = () => {
     renderFormErrors();
   };
 
+  // 검증된 입력값으로 FormData 구성 후 전송
   const submitContactForm = async () => {
     const formData = new FormData(contactForm);
 
@@ -151,6 +161,7 @@ export const initContact = () => {
     await sendContactMessage(contactForm.action, formData);
   };
 
+  // 입력과 포커스 이탈 시점의 단계별 검증
   FORM_FIELD_NAMES.forEach((name) => {
     const field = formFields[name];
 
@@ -176,6 +187,7 @@ export const initContact = () => {
     });
   });
 
+  // 전체 검증 후 문의 전송 상태 처리
   contactForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
 

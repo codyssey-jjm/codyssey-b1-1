@@ -7,6 +7,7 @@ import {
 } from "./repository.js";
 import { createProjectsView } from "./view.js";
 
+// GitHub 프로젝트 요청·필터·화면 상태 조정
 export const initProjects = () => {
   const projectStatus = document.querySelector("[data-project-status]");
   const projectStatusMessage = document.querySelector("[data-project-status-message]");
@@ -18,6 +19,7 @@ export const initProjects = () => {
     return;
   }
 
+  // 요청 결과와 현재 언어 선택 상태
   const projectState = {
     status: "idle",
     repositories: [],
@@ -33,6 +35,7 @@ export const initProjects = () => {
     projectFilters,
   });
 
+  // 상태에서 화면 출력용 파생 데이터 생성
   const renderProjects = () => {
     const { status, repositories, errorType, selectedLanguage } = projectState;
     const filteredRepositories = filterRepositories(repositories, selectedLanguage);
@@ -51,6 +54,7 @@ export const initProjects = () => {
     });
   };
 
+  // HTTP 상태 기준 사용자 오류 유형 분류
   const getProjectErrorType = (status) => {
     if (status === 403) {
       return "rate-limit";
@@ -63,6 +67,7 @@ export const initProjects = () => {
     return "general";
   };
 
+  // 저장소 요청의 로딩·성공·빈 결과·오류 흐름
   const loadProjects = async () => {
     if (projectState.status === "loading") {
       return;
@@ -88,6 +93,7 @@ export const initProjects = () => {
     }
   };
 
+  // 추가 요청 없는 언어 필터 상태 변경
   projectFilters?.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) {
       return;

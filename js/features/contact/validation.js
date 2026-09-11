@@ -1,6 +1,8 @@
+// 문의 폼 검증 대상 필드와 이메일 형식
 export const FORM_FIELD_NAMES = ["name", "email", "message"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// 필드별 필수값과 이메일 형식 검증
 export const validateField = (name, value) => {
   if (!value) {
     const requiredMessages = {
@@ -19,5 +21,6 @@ export const validateField = (name, value) => {
   return "";
 };
 
+// 전체 필드 오류 객체 생성
 export const validateForm = (values) =>
   Object.fromEntries(FORM_FIELD_NAMES.map((name) => [name, validateField(name, values[name])]));

@@ -1,3 +1,4 @@
+// 모바일 메뉴와 페이지 내부 앵커 이동 관리
 export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
   const siteHeader = document.querySelector("[data-header]");
   const navigation = document.querySelector("[data-navigation]");
@@ -8,8 +9,10 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     return;
   }
 
+  // 모바일 메뉴 열림 상태
   const state = { isMenuOpen: false };
 
+  // 메뉴 내부 키보드 탐색 대상 수집
   const getFocusableHeaderElements = () => {
     if (!siteHeader) {
       return [];
@@ -20,6 +23,7 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     );
   };
 
+  // 메뉴 표시 상태와 접근성 속성 갱신
   const renderMenu = (isOpen, { moveFocus = false } = {}) => {
     state.isMenuOpen = isOpen;
 
@@ -38,6 +42,7 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     }
   };
 
+  // 메뉴 닫기와 선택적 포커스 복귀
   const closeMenu = ({ returnFocus = false } = {}) => {
     if (!state.isMenuOpen) {
       return;
@@ -54,6 +59,7 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     renderMenu(!state.isMenuOpen, { moveFocus: !state.isMenuOpen });
   });
 
+  // Escape 종료와 Tab 포커스 순환
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.isMenuOpen) {
       closeMenu({ returnFocus: true });
@@ -81,14 +87,17 @@ export const initNavigation = ({ desktopMediaQuery, reducedMotionQuery }) => {
     }
   });
 
+  // 데스크톱 전환 시 모바일 메뉴 상태 초기화
   desktopMediaQuery.addEventListener("change", ({ matches }) => {
     if (matches) {
       closeMenu();
     }
   });
 
+  // 모션 감소 설정에 따른 스크롤 방식 결정
   const getScrollBehavior = () => (reducedMotionQuery.matches ? "auto" : "smooth");
 
+  // 유효한 페이지 내부 링크의 부드러운 이동
   anchorLinks.forEach((link) => {
     link.addEventListener("click", (event) => {
       const targetId = link.getAttribute("href");

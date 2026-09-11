@@ -1,6 +1,7 @@
 import { GITHUB_USERNAME } from "../../services/github.js";
 import { ALL_PROJECT_LANGUAGES, getProjectLanguage } from "./repository.js";
 
+// 프로젝트 상태 클래스와 외부 문자열 치환표
 const PROJECT_STATUS_CLASSES = ["is-loading", "is-success", "is-empty", "is-error"];
 const HTML_ESCAPE_CHARACTERS = {
   "&": "&amp;",
@@ -15,9 +16,11 @@ const projectDateFormatter = new Intl.DateTimeFormat("ko-KR", {
   day: "numeric",
 });
 
+// 외부 데이터의 HTML 삽입 전 특수문자 치환
 const escapeHTML = (value) =>
   String(value).replace(/[&<>"']/g, (character) => HTML_ESCAPE_CHARACTERS[character]);
 
+// GitHub 외부 주소 제한과 사용자 페이지 대체 주소
 const getSafeGitHubUrl = (value) => {
   const fallbackUrl = `https://github.com/${GITHUB_USERNAME}`;
 
@@ -29,11 +32,13 @@ const getSafeGitHubUrl = (value) => {
   }
 };
 
+// 유효하지 않은 저장소 날짜의 대체 문구 처리
 const formatProjectDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "날짜 정보 없음" : projectDateFormatter.format(date);
 };
 
+// 저장소 데이터 기반 프로젝트 카드 마크업 생성
 const createProjectCard = (repository) => {
   const {
     name = "Untitled",
@@ -80,6 +85,7 @@ const createProjectCard = (repository) => {
   `;
 };
 
+// 프로젝트 상태를 직접 변경하지 않는 화면 렌더러 생성
 export const createProjectsView = ({
   projectStatus,
   projectStatusMessage,
@@ -87,6 +93,7 @@ export const createProjectsView = ({
   projectRetryButton,
   projectFilters,
 }) => {
+  // 요청·필터 상태별 안내 문구 결정
   const getProjectStatusMessage = ({
     status,
     errorType,
@@ -128,6 +135,7 @@ export const createProjectsView = ({
     return "프로젝트를 불러올 준비가 되었습니다.";
   };
 
+  // 상태 패널과 재시도 버튼 표시 갱신
   const renderProjectStatus = (viewModel) => {
     if (!projectStatus || !projectStatusMessage) {
       return;
@@ -152,6 +160,7 @@ export const createProjectsView = ({
     }
   };
 
+  // 성공 상태의 프로젝트 카드 목록 갱신
   const renderProjectList = ({ status, filteredRepositories }) => {
     if (!projectList) {
       return;
@@ -164,6 +173,7 @@ export const createProjectsView = ({
         : "";
   };
 
+  // 언어별 개수와 선택 상태를 포함한 필터 버튼 생성
   const createProjectFilterButton = (language, count, selectedLanguage) => {
     const button = document.createElement("button");
     const label = document.createElement("span");
@@ -190,6 +200,7 @@ export const createProjectsView = ({
     return button;
   };
 
+  // 현재 저장소 언어 구성을 기준으로 필터 목록 재생성
   const renderProjectFilters = ({
     status,
     repositoryCount,
@@ -222,12 +233,14 @@ export const createProjectsView = ({
     projectFilters.append(fragment);
   };
 
+  // 상태 패널·필터·카드 목록의 일괄 화면 갱신
   const render = (viewModel) => {
     renderProjectStatus(viewModel);
     renderProjectFilters(viewModel);
     renderProjectList(viewModel);
   };
 
+  // 필터 목록 재생성 후 활성 버튼으로 포커스 복귀
   const focusFilter = (selectedLanguage) => {
     if (!projectFilters) {
       return;
