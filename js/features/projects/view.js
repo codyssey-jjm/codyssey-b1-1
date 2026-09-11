@@ -1,4 +1,3 @@
-import { GITHUB_USERNAME } from "../../services/github.js";
 import { ALL_PROJECT_LANGUAGES, getProjectLanguage } from "./repository.js";
 
 // 프로젝트 상태 클래스와 외부 문자열 치환표
@@ -20,10 +19,8 @@ const projectDateFormatter = new Intl.DateTimeFormat("ko-KR", {
 const escapeHTML = (value) =>
   String(value).replace(/[&<>"']/g, (character) => HTML_ESCAPE_CHARACTERS[character]);
 
-// GitHub 외부 주소 제한과 사용자 페이지 대체 주소
-const getSafeGitHubUrl = (value) => {
-  const fallbackUrl = `https://github.com/${GITHUB_USERNAME}`;
-
+// GitHub 주소 제한과 전달받은 프로필 주소로 대체
+const getSafeGitHubUrl = (value, fallbackUrl) => {
   try {
     const url = new URL(value);
     return url.protocol === "https:" && url.hostname === "github.com" ? url.href : fallbackUrl;
@@ -39,7 +36,7 @@ const formatProjectDate = (value) => {
 };
 
 // 저장소 데이터 기반 프로젝트 카드 마크업 생성
-const createProjectCard = (repository) => {
+const createProjectCard = (repository, fallbackUrl) => {
   const {
     name = "Untitled",
     description,
@@ -52,7 +49,7 @@ const createProjectCard = (repository) => {
   const projectDescription = description || "프로젝트 설명이 아직 등록되지 않았습니다.";
   const projectLanguage = getProjectLanguage(repository);
   const projectInitial = [...projectName][0]?.toUpperCase() ?? "?";
-  const projectUrl = getSafeGitHubUrl(htmlUrl);
+  const projectUrl = getSafeGitHubUrl(htmlUrl, fallbackUrl);
   const formattedStarCount = Number.isFinite(starCount) ? starCount : 0;
 
   return `
@@ -92,6 +89,7 @@ export const createProjectsView = ({
   projectList,
   projectRetryButton,
   projectFilters,
+  fallbackUrl,
 }) => {
   // 요청·필터 상태별 안내 문구 결정
   const getProjectStatusMessage = ({
@@ -169,7 +167,9 @@ export const createProjectsView = ({
     projectList.setAttribute("aria-busy", String(status === "loading"));
     projectList.innerHTML =
       status === "success"
-        ? filteredRepositories.map((repository) => createProjectCard(repository)).join("")
+        ? filteredRepositories
+            .map((repository) => createProjectCard(repository, fallbackUrl))
+            .join("")
         : "";
   };
 

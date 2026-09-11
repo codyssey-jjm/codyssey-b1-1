@@ -12,11 +12,27 @@ export const prepareRepositories = (repositories) =>
 export const getProjectLanguage = ({ language }) =>
   typeof language === "string" && language.trim() ? language.trim() : "Other";
 
+// 언어 목록과 개수 목록의 공통 정렬 기준
+const compareLanguages = (first, second) =>
+  first.localeCompare(second, "en", { sensitivity: "base" });
+
 // 중복 없는 언어 목록의 알파벳 정렬
 export const getProjectLanguages = (repositories) =>
-  [...new Set(repositories.map(getProjectLanguage))].sort((first, second) =>
-    first.localeCompare(second, "en", { sensitivity: "base" }),
-  );
+  [...new Set(repositories.map(getProjectLanguage))].sort(compareLanguages);
+
+// 저장소 한 번 순회로 언어별 개수 집계 후 정렬
+export const getProjectLanguageCounts = (repositories) => {
+  const counts = new Map();
+
+  repositories.forEach((repository) => {
+    const language = getProjectLanguage(repository);
+    counts.set(language, (counts.get(language) ?? 0) + 1);
+  });
+
+  return [...counts]
+    .sort(([first], [second]) => compareLanguages(first, second))
+    .map(([language, count]) => ({ language, count }));
+};
 
 // 선택 언어 기준 저장소 필터링
 export const filterRepositories = (repositories, language) => {

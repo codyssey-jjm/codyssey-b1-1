@@ -1,8 +1,9 @@
-import { fetchRepositories } from "../../services/github.js";
+import { GITHUB_PROFILE_URL, fetchRepositories } from "../../services/github.js";
 import {
   ALL_PROJECT_LANGUAGES,
   prepareRepositories,
   getProjectLanguages,
+  getProjectLanguageCounts,
   filterRepositories,
 } from "./repository.js";
 import { createProjectsView } from "./view.js";
@@ -33,16 +34,14 @@ export const initProjects = () => {
     projectList,
     projectRetryButton,
     projectFilters,
+    fallbackUrl: GITHUB_PROFILE_URL,
   });
 
   // 상태에서 화면 출력용 파생 데이터 생성
   const renderProjects = () => {
     const { status, repositories, errorType, selectedLanguage } = projectState;
     const filteredRepositories = filterRepositories(repositories, selectedLanguage);
-    const languageCounts = getProjectLanguages(repositories).map((language) => ({
-      language,
-      count: filterRepositories(repositories, language).length,
-    }));
+    const languageCounts = getProjectLanguageCounts(repositories);
 
     view.render({
       status,
