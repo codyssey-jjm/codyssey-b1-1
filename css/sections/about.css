@@ -1,0 +1,100 @@
+/* 자기소개·프로필·이력 정보 */
+.about__layout {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.about__portrait {
+  position: relative;
+}
+
+.about__portrait::after {
+  position: absolute;
+  z-index: -1;
+  right: -0.5rem;
+  bottom: 1.75rem;
+  width: 55%;
+  height: 40%;
+  background: var(--color-accent);
+  content: "";
+}
+
+.about__portrait img {
+  width: min(100%, 32rem);
+  border: 0.125rem solid var(--color-text);
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.about__portrait figcaption {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.about__content {
+  align-self: center;
+}
+
+.about__lead {
+  max-width: 27ch;
+  font-size: clamp(1.5rem, 6vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.35;
+}
+
+.about__lead + p {
+  max-width: 42rem;
+  margin-top: var(--space-8);
+  color: var(--color-muted);
+}
+
+.about__facts {
+  margin-top: var(--space-12);
+  border-bottom: var(--border);
+}
+
+.about__facts > div {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.7fr) 1.3fr;
+  gap: var(--space-4);
+  border-top: var(--border);
+  padding-block: var(--space-3);
+}
+
+.about__facts dt {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.about__facts dd {
+  font-weight: 500;
+}
+
+/* 태블릿 레이아웃 */
+@media (min-width: 48rem) {
+  .about__layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(3rem, 8vw, 7rem);
+  }
+
+  .about__content {
+    padding-top: var(--space-12);
+  }
+}
+
+/* 데스크톱 레이아웃 */
+@media (min-width: 64rem) {
+  .about__portrait {
+    margin-left: 8%;
+  }
+
+  .about__content {
+    padding-top: var(--space-24);
+  }
+}

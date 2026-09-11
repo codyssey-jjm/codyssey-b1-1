@@ -1,0 +1,71 @@
+/* 기술 목록과 상호작용 */
+.skills__list {
+  border-bottom: 0.125rem solid var(--color-text);
+}
+
+.skills__item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--space-2) var(--space-4);
+  align-items: baseline;
+  border-top: 0.125rem solid var(--color-text);
+  padding: var(--space-6) var(--space-2);
+  transition:
+    background-color var(--transition-fast) ease,
+    color var(--transition-fast) ease;
+}
+
+.skills__number {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.skills__item strong {
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 9vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.skills__item > span:last-child {
+  grid-column: 2;
+  max-width: 34rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  transition: color var(--transition-fast) ease;
+}
+
+/* 태블릿 레이아웃 */
+@media (min-width: 48rem) {
+  .skills__item {
+    grid-template-columns: 4rem minmax(12rem, 1fr) minmax(16rem, 0.8fr);
+    gap: var(--space-6);
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .skills__item > span:last-child {
+    grid-column: 3;
+  }
+}
+
+/* hover 지원 환경의 상호작용 */
+@media (hover: hover) {
+  .skills__item:hover,
+  .skills__item:focus-within {
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+
+  .skills__item:hover strong,
+  .skills__item:focus-within strong {
+    transform: translateX(var(--space-2));
+  }
+
+  .skills__item:hover > span:last-child,
+  .skills__item:focus-within > span:last-child {
+    color: var(--color-accent-text);
+  }
+}

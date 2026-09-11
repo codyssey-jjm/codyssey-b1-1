@@ -1,0 +1,135 @@
+/* 기본 요소 초기화와 페이지·접근성 스타일 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,
+h1,
+h2,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  border: 0;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.7;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color var(--transition-panel) var(--ease-out),
+    color var(--transition-panel) var(--ease-out);
+}
+
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, transparent calc(100% - 1px), var(--color-line) 1px),
+    linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-line) 1px);
+  background-size: 5rem 5rem;
+  opacity: 0.12;
+  pointer-events: none;
+  content: "";
+}
+
+a {
+  color: inherit;
+  text-decoration-color: currentColor;
+  text-underline-offset: 0.2em;
+}
+
+button,
+a,
+input,
+textarea {
+  border-radius: 0.125rem;
+}
+
+:focus-visible {
+  outline: 0.1875rem solid var(--color-accent);
+  outline-offset: 0.25rem;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  top: var(--space-4);
+  left: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  transform: translateY(-200%);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}

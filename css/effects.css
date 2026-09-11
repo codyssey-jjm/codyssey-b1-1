@@ -1,0 +1,68 @@
+/* 스크롤 탑·등장 효과와 전역 모션 감소 */
+.scroll-top {
+  position: fixed;
+  z-index: 40;
+  right: max(var(--space-4), env(safe-area-inset-right));
+  bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  display: grid;
+  width: 3rem;
+  height: 3rem;
+  place-items: center;
+  border: 0.125rem solid var(--color-text);
+  border-radius: 50%;
+  transform: translateY(1rem);
+  background: var(--color-text);
+  color: var(--color-bg);
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast) var(--ease-out),
+    opacity var(--transition-fast) ease,
+    background-color var(--transition-fast) ease,
+    color var(--transition-fast) ease;
+}
+
+.scroll-top.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* JavaScript의 등장 효과 초기화 이후에만 콘텐츠 숨김 */
+.reveal-ready [data-reveal] {
+  transform: translateY(1.5rem);
+  opacity: 0;
+  transition:
+    transform 600ms var(--ease-out),
+    opacity 600ms ease;
+}
+
+.reveal-ready [data-reveal].is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* hover 지원 환경의 상호작용 */
+@media (hover: hover) {
+  .scroll-top:hover {
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+}
+
+/* 모션 감소 설정의 대체 표현 */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
