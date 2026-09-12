@@ -208,7 +208,7 @@
         <header class="section-heading" data-reveal>
           <p class="section-heading__number" aria-hidden="true">03</p>
           <h2 id="projects-title">Projects</h2>
-          <p>GitHub API에서 최근 저장소를 불러와 소개합니다.</p>
+          <p>웹·앱·게임 분야에서 진행한 프로젝트를 소개합니다.</p>
         </header>
 
         <div
@@ -226,11 +226,35 @@
 
         <div
           class="projects__filters"
-          role="group"
-          aria-label="프로젝트 주 사용 언어 필터"
           data-project-filters
           hidden
-        ></div>
+        >
+          <div class="projects__filter-group">
+            <p class="projects__filter-title" id="project-category-filter-title">
+              <span aria-hidden="true">01</span>
+              개발 분야
+            </p>
+            <div
+              class="projects__filter-list"
+              role="group"
+              aria-labelledby="project-category-filter-title"
+              data-project-category-filters
+            ></div>
+          </div>
+
+          <div class="projects__filter-group projects__filter-group--secondary">
+            <p class="projects__filter-title" id="project-language-filter-title">
+              <span aria-hidden="true">02</span>
+              주 사용 언어
+            </p>
+            <div
+              class="projects__filter-list"
+              role="group"
+              aria-labelledby="project-language-filter-title"
+              data-project-language-filters
+            ></div>
+          </div>
+        </div>
 
         <div
           class="projects__grid"

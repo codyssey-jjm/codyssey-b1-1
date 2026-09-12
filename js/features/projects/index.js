@@ -1,10 +1,13 @@
 import { GITHUB_PROFILE_URL, fetchRepositories } from "../../services/github.js";
 import {
+  ALL_PROJECT_CATEGORIES,
   ALL_PROJECT_LANGUAGES,
   prepareRepositories,
+  getProjectCategoryCounts,
   getProjectLanguages,
   getProjectLanguageCounts,
-  filterRepositories,
+  filterRepositoriesByCategory,
+  filterRepositoriesByLanguage,
 } from "./repository.js";
 import { createProjectsView } from "./view.js";
 
@@ -15,16 +18,19 @@ export const initProjects = () => {
   const projectList = document.querySelector("[data-project-list]");
   const projectRetryButton = document.querySelector("[data-project-retry]");
   const projectFilters = document.querySelector("[data-project-filters]");
+  const projectCategoryFilters = document.querySelector("[data-project-category-filters]");
+  const projectLanguageFilters = document.querySelector("[data-project-language-filters]");
 
   if (!projectList) {
     return;
   }
 
-  // 요청 결과와 현재 언어 선택 상태
+  // 요청 결과와 현재 개발 분야 선택 상태
   const projectState = {
     status: "idle",
     repositories: [],
     errorType: null,
+    selectedCategory: ALL_PROJECT_CATEGORIES,
     selectedLanguage: ALL_PROJECT_LANGUAGES,
   };
 
@@ -34,21 +40,35 @@ export const initProjects = () => {
     projectList,
     projectRetryButton,
     projectFilters,
+    projectCategoryFilters,
+    projectLanguageFilters,
     fallbackUrl: GITHUB_PROFILE_URL,
   });
 
   // 상태에서 화면 출력용 파생 데이터 생성
   const renderProjects = () => {
-    const { status, repositories, errorType, selectedLanguage } = projectState;
-    const filteredRepositories = filterRepositories(repositories, selectedLanguage);
-    const languageCounts = getProjectLanguageCounts(repositories);
+    const { status, repositories, errorType, selectedCategory, selectedLanguage } =
+      projectState;
+    const categoryRepositories = filterRepositoriesByCategory(
+      repositories,
+      selectedCategory,
+    );
+    const filteredRepositories = filterRepositoriesByLanguage(
+      categoryRepositories,
+      selectedLanguage,
+    );
+    const categoryCounts = getProjectCategoryCounts(repositories);
+    const languageCounts = getProjectLanguageCounts(categoryRepositories);
 
     view.render({
       status,
       errorType,
+      selectedCategory,
       selectedLanguage,
       filteredRepositories,
       repositoryCount: repositories.length,
+      categoryRepositoryCount: categoryRepositories.length,
+      categoryCounts,
       languageCounts,
     });
   };
@@ -75,6 +95,7 @@ export const initProjects = () => {
     projectState.status = "loading";
     projectState.repositories = [];
     projectState.errorType = null;
+    projectState.selectedCategory = ALL_PROJECT_CATEGORIES;
     projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
     renderProjects();
 
@@ -92,7 +113,7 @@ export const initProjects = () => {
     }
   };
 
-  // 추가 요청 없는 언어 필터 상태 변경
+  // 추가 요청 없는 상·하위 필터 상태 변경
   projectFilters?.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) {
       return;
@@ -104,15 +125,48 @@ export const initProjects = () => {
       return;
     }
 
-    const { projectFilter } = filterButton.dataset;
+    const { projectFilter, projectFilterType } = filterButton.dataset;
 
-    if (!projectFilter || projectFilter === projectState.selectedLanguage) {
+    if (!projectFilter || !projectFilterType) {
       return;
     }
 
+    if (projectFilterType === "category") {
+      if (projectFilter === projectState.selectedCategory) {
+        return;
+      }
+
+      const isKnownCategory =
+        projectFilter === ALL_PROJECT_CATEGORIES ||
+        getProjectCategoryCounts(projectState.repositories).some(
+          ({ category }) => category === projectFilter,
+        );
+
+      if (!isKnownCategory) {
+        return;
+      }
+
+      projectState.selectedCategory = projectFilter;
+      projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
+      renderProjects();
+      view.focusFilter("category", projectState.selectedCategory);
+      return;
+    }
+
+    if (
+      projectFilterType !== "language" ||
+      projectFilter === projectState.selectedLanguage
+    ) {
+      return;
+    }
+
+    const categoryRepositories = filterRepositoriesByCategory(
+      projectState.repositories,
+      projectState.selectedCategory,
+    );
     const isKnownLanguage =
       projectFilter === ALL_PROJECT_LANGUAGES ||
-      getProjectLanguages(projectState.repositories).includes(projectFilter);
+      getProjectLanguages(categoryRepositories).includes(projectFilter);
 
     if (!isKnownLanguage) {
       return;
@@ -120,8 +174,7 @@ export const initProjects = () => {
 
     projectState.selectedLanguage = projectFilter;
     renderProjects();
-
-    view.focusFilter(projectState.selectedLanguage);
+    view.focusFilter("language", projectState.selectedLanguage);
   });
 
   projectRetryButton?.addEventListener("click", loadProjects);
