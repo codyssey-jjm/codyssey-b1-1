@@ -82,32 +82,39 @@
 }
 
 .hero-collage {
-  position: relative;
-  min-height: 25rem;
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-4);
   isolation: isolate;
+  list-style: none;
 }
 
 .hero-collage__item {
-  position: absolute;
-  width: min(78vw, 20rem);
+  position: relative;
+  width: min(92%, 20rem);
 }
 
 .hero-collage__item--first {
-  z-index: 1;
-  top: 0;
-  left: 0;
+  justify-self: start;
+  transform: rotate(-0.8deg);
 }
 
 .hero-collage__item--second {
-  z-index: 2;
-  top: 7rem;
-  right: 0;
+  justify-self: end;
+  transform: rotate(0.8deg);
 }
 
 .hero-collage__item--third {
-  z-index: 3;
-  top: 14rem;
-  left: 8%;
+  justify-self: start;
+  transform: rotate(0.6deg);
+}
+
+.hero-collage__item--fourth {
+  justify-self: end;
+  transform: rotate(-0.6deg);
 }
 
 .hero-collage__card {
@@ -125,6 +132,11 @@
 
 .hero-collage__item--third .hero-collage__card {
   background: var(--color-accent);
+}
+
+.hero-collage__item--fourth .hero-collage__card {
+  background: var(--color-text);
+  color: var(--color-bg);
 }
 
 .hero-collage__card::before {
@@ -193,20 +205,25 @@
   }
 
   .hero-collage {
-    min-height: 31rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8) var(--space-6);
+    padding-block: var(--space-6) var(--space-12);
   }
 
   .hero-collage__item {
-    width: min(54vw, 27rem);
+    width: 100%;
   }
 
   .hero-collage__item--second {
-    top: 8.5rem;
+    transform: translateY(var(--space-4)) rotate(0.8deg);
   }
 
   .hero-collage__item--third {
-    top: 17rem;
-    left: 16%;
+    transform: rotate(0.6deg);
+  }
+
+  .hero-collage__item--fourth {
+    transform: translateY(var(--space-4)) rotate(-0.6deg);
   }
 
   .hero-collage__card a {
@@ -233,31 +250,15 @@
   }
 
   .hero-collage {
-    min-height: min(72vh, 42rem);
-    grid-column: 7 / -1;
+    width: min(100%, 68rem);
+    grid-column: 2 / -2;
+    grid-row: 2;
     align-self: center;
+    justify-self: center;
   }
 
   .hero-collage__item {
-    width: min(31vw, 28rem);
-  }
-
-  .hero-collage__item--first {
-    top: 0;
-    right: 0;
-    left: auto;
-  }
-
-  .hero-collage__item--second {
-    top: 30%;
-    right: auto;
-    left: -6%;
-  }
-
-  .hero-collage__item--third {
-    top: 60%;
-    right: 4%;
-    left: auto;
+    max-width: 32rem;
   }
 }
 

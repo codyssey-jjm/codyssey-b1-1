@@ -4,41 +4,49 @@ const FEATURED_REPOSITORIES = [
     fullName: "jungmyung16/CatdogEats-FE",
     category: "web",
     stack: ["React", "Frontend"],
+    status: "complete",
   },
   {
     fullName: "jungmyung16/CatdogEats-BE",
     category: "web",
     stack: ["Spring", "Backend"],
+    status: "complete",
   },
   {
     fullName: "jungmyung16/Shipment-Simulator",
     category: "web",
     stack: ["Spring", "Backend"],
+    status: "complete",
   },
   {
     fullName: "jungmyung16/WeatherApp-with-Flutter",
     category: "app",
     stack: ["Flutter", "Dart"],
+    status: "complete",
   },
   {
     fullName: "gameDev-graphics-Lab/ComputerGraphics_Project",
     category: "game",
     stack: ["Computer Graphics"],
+    status: "complete",
   },
   {
     fullName: "gameDev-graphics-Lab/VamSurvialLike_Game",
     category: "game",
     stack: ["Unity"],
+    status: "complete",
   },
   {
     fullName: "gameDev-graphics-Lab/EscapeDungeon",
     category: "game",
     stack: ["Unity"],
+    status: "complete",
   },
   {
     fullName: "gameDev-graphics-Lab/UnrealTPS",
     category: "game",
     stack: ["Unreal Engine"],
+    status: "complete",
   },
 ];
 
@@ -50,9 +58,16 @@ const PROJECT_CATEGORY_LABELS = {
   app: "앱 개발",
   game: "게임 개발",
 };
+const PROJECT_STATUS_ORDER = ["complete", "in-progress"];
+const PROJECT_STATUS_LABELS = {
+  all: "전체 상태",
+  complete: "완료",
+  "in-progress": "진행 중",
+};
 
 export const ALL_PROJECT_CATEGORIES = "all";
 export const ALL_PROJECT_LANGUAGES = "all";
+export const ALL_PROJECT_STATUSES = "all";
 
 // 대소문자 차이를 제거한 저장소 전체 이름
 const normalizeRepositoryName = (repositoryName) =>
@@ -67,7 +82,7 @@ export const prepareRepositories = (repositories) => {
     ]),
   );
 
-  return FEATURED_REPOSITORIES.map(({ fullName, category, stack }) => {
+  return FEATURED_REPOSITORIES.map(({ fullName, category, stack, status }) => {
     const repository = repositoriesByName.get(normalizeRepositoryName(fullName));
 
     return repository
@@ -75,6 +90,7 @@ export const prepareRepositories = (repositories) => {
           ...repository,
           portfolioCategory: category,
           portfolioStack: stack,
+          portfolioStatus: status,
         }
       : null;
   }).filter(Boolean);
@@ -93,6 +109,18 @@ export const getProjectCategoryLabel = (category) =>
 
 export const getProjectStack = ({ portfolioStack }) =>
   Array.isArray(portfolioStack) ? portfolioStack : [];
+
+export const getProjectStatus = ({ portfolioStatus }) =>
+  PROJECT_STATUS_ORDER.includes(portfolioStatus) ? portfolioStatus : "in-progress";
+
+export const getProjectStatusLabel = (status) =>
+  PROJECT_STATUS_LABELS[status] ?? "상태 미정";
+
+export const isProjectCategory = (category) =>
+  category === ALL_PROJECT_CATEGORIES || PROJECT_CATEGORY_ORDER.includes(category);
+
+export const isProjectStatus = (status) =>
+  status === ALL_PROJECT_STATUSES || PROJECT_STATUS_ORDER.includes(status);
 
 // 언어 목록과 개수 목록의 공통 정렬 기준
 const compareLanguages = (first, second) =>
@@ -126,6 +154,16 @@ export const getProjectLanguageCounts = (repositories) => {
     .map(([language, count]) => ({ language, count }));
 };
 
+// 진행 상태별 저장소 개수 집계
+export const getProjectStatusCounts = (repositories) =>
+  PROJECT_STATUS_ORDER.map((status) => ({
+    status,
+    label: getProjectStatusLabel(status),
+    count: repositories.filter(
+      (repository) => getProjectStatus(repository) === status,
+    ).length,
+  }));
+
 // 선택 개발 분야 기준 저장소 필터링
 export const filterRepositoriesByCategory = (repositories, category) => {
   if (category === ALL_PROJECT_CATEGORIES) {
@@ -145,5 +183,16 @@ export const filterRepositoriesByLanguage = (repositories, language) => {
 
   return repositories.filter(
     (repository) => getProjectLanguage(repository) === language,
+  );
+};
+
+// 선택 진행 상태 기준 저장소 필터링
+export const filterRepositoriesByStatus = (repositories, status) => {
+  if (status === ALL_PROJECT_STATUSES) {
+    return repositories;
+  }
+
+  return repositories.filter(
+    (repository) => getProjectStatus(repository) === status,
   );
 };
