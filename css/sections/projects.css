@@ -89,6 +89,12 @@
   background: var(--color-bg);
 }
 
+.projects__filter-group--tertiary {
+  border-width: 1px;
+  border-color: var(--color-line);
+  background: var(--color-surface);
+}
+
 .projects__filter-title {
   display: flex;
   align-items: center;
@@ -111,6 +117,11 @@
 
 .projects__filter-group--secondary .projects__filter-title span {
   background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+
+.projects__filter-group--tertiary .projects__filter-title span {
+  background: var(--color-cyan);
   color: var(--color-accent-text);
 }
 
@@ -180,6 +191,21 @@
 
 .project-filter--language.is-active {
   box-shadow: 0.2rem 0.2rem 0 var(--color-cyan);
+}
+
+.project-filter--status {
+  min-height: 2.4rem;
+  border-width: 1px;
+  background: var(--color-surface);
+  text-transform: none;
+}
+
+.project-filter--status.is-active {
+  box-shadow: 0.2rem 0.2rem 0 var(--color-success);
+}
+
+.project-filter--status[data-project-filter="in-progress"].is-active {
+  box-shadow: 0.2rem 0.2rem 0 var(--color-orange);
 }
 
 .projects__grid {
@@ -263,6 +289,10 @@
   font-size: 0.68rem;
 }
 
+.project-card__meta {
+  justify-content: flex-start;
+}
+
 .project-card__title {
   margin: var(--space-4) 0 0;
   overflow-wrap: anywhere;
@@ -278,6 +308,28 @@
   color: var(--color-text);
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.project-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  color: var(--color-success);
+  font-weight: 700;
+}
+
+.project-card__status::before {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.project-card__status--in-progress {
+  color: var(--color-orange);
 }
 
 .project-card__description {

@@ -1,10 +1,13 @@
 import {
   ALL_PROJECT_CATEGORIES,
   ALL_PROJECT_LANGUAGES,
+  ALL_PROJECT_STATUSES,
   getProjectCategory,
   getProjectCategoryLabel,
   getProjectLanguage,
   getProjectStack,
+  getProjectStatus,
+  getProjectStatusLabel,
 } from "./repository.js";
 
 // 프로젝트 상태 클래스와 외부 문자열 치환표
@@ -58,6 +61,8 @@ const createProjectCard = (repository, fallbackUrl) => {
   const projectCategoryLabel = getProjectCategoryLabel(projectCategory);
   const projectLanguage = getProjectLanguage(repository);
   const projectStack = getProjectStack(repository);
+  const projectStatus = getProjectStatus(repository);
+  const projectStatusLabel = getProjectStatusLabel(projectStatus);
   const projectInitial = [...projectName][0]?.toUpperCase() ?? "?";
   const projectUrl = getSafeGitHubUrl(htmlUrl, fallbackUrl);
   const formattedStarCount = Number.isFinite(starCount) ? starCount : 0;
@@ -74,6 +79,7 @@ const createProjectCard = (repository, fallbackUrl) => {
         <div class="project-card__meta">
           <span class="project-card__category">${escapeHTML(projectCategoryLabel)}</span>
           <span>${escapeHTML(projectLanguage)}</span>
+          <span class="project-card__status project-card__status--${projectStatus}">${escapeHTML(projectStatusLabel)}</span>
         </div>
         <h3 class="project-card__title">${escapeHTML(projectName)}</h3>
         <p class="project-card__description">${escapeHTML(projectDescription)}</p>
@@ -107,6 +113,7 @@ export const createProjectsView = ({
   projectFilters,
   projectCategoryFilters,
   projectLanguageFilters,
+  projectStatusFilters,
   fallbackUrl,
 }) => {
   // 요청·필터 상태별 안내 문구 결정
@@ -115,6 +122,7 @@ export const createProjectsView = ({
     errorType,
     selectedCategory,
     selectedLanguage,
+    selectedStatus,
     filteredRepositories,
   }) => {
     if (status === "loading") {
@@ -123,7 +131,7 @@ export const createProjectsView = ({
 
     if (status === "success") {
       if (filteredRepositories.length === 0) {
-        return "선택한 개발 분야에 해당하는 프로젝트가 없습니다.";
+        return "선택한 필터 조건에 해당하는 프로젝트가 없습니다.";
       }
 
       const categoryLabel =
@@ -132,7 +140,13 @@ export const createProjectsView = ({
           : getProjectCategoryLabel(selectedCategory);
       const languageLabel =
         selectedLanguage === ALL_PROJECT_LANGUAGES ? "" : selectedLanguage;
-      const filterLabel = [categoryLabel, languageLabel].filter(Boolean).join(" · ");
+      const statusLabel =
+        selectedStatus === ALL_PROJECT_STATUSES
+          ? ""
+          : getProjectStatusLabel(selectedStatus);
+      const filterLabel = [categoryLabel, languageLabel, statusLabel]
+        .filter(Boolean)
+        .join(" · ");
 
       if (!filterLabel) {
         return `${filteredRepositories.length}개의 프로젝트를 불러왔습니다.`;
@@ -230,12 +244,20 @@ export const createProjectsView = ({
     status,
     repositoryCount,
     categoryRepositoryCount,
+    languageRepositoryCount,
     categoryCounts,
     languageCounts,
+    statusCounts,
     selectedCategory,
     selectedLanguage,
+    selectedStatus,
   }) => {
-    if (!projectFilters || !projectCategoryFilters || !projectLanguageFilters) {
+    if (
+      !projectFilters ||
+      !projectCategoryFilters ||
+      !projectLanguageFilters ||
+      !projectStatusFilters
+    ) {
       return;
     }
 
@@ -244,6 +266,7 @@ export const createProjectsView = ({
     projectFilters.hidden = !shouldShowFilters;
     projectCategoryFilters.replaceChildren();
     projectLanguageFilters.replaceChildren();
+    projectStatusFilters.replaceChildren();
 
     if (!shouldShowFilters) {
       return;
@@ -251,6 +274,7 @@ export const createProjectsView = ({
 
     const categoryFragment = document.createDocumentFragment();
     const languageFragment = document.createDocumentFragment();
+    const statusFragment = document.createDocumentFragment();
 
     categoryFragment.append(
       createProjectFilterButton({
@@ -296,8 +320,31 @@ export const createProjectsView = ({
       );
     });
 
+    statusFragment.append(
+      createProjectFilterButton({
+        type: "status",
+        value: ALL_PROJECT_STATUSES,
+        labelText: getProjectStatusLabel(ALL_PROJECT_STATUSES),
+        count: languageRepositoryCount,
+        isActive: selectedStatus === ALL_PROJECT_STATUSES,
+      }),
+    );
+
+    statusCounts.forEach(({ status, label, count }) => {
+      statusFragment.append(
+        createProjectFilterButton({
+          type: "status",
+          value: status,
+          labelText: label,
+          count,
+          isActive: selectedStatus === status,
+        }),
+      );
+    });
+
     projectCategoryFilters.append(categoryFragment);
     projectLanguageFilters.append(languageFragment);
+    projectStatusFilters.append(statusFragment);
   };
 
   // 상태 패널·필터·카드 목록의 일괄 화면 갱신

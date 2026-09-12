@@ -2,12 +2,17 @@ import { GITHUB_PROFILE_URL, fetchRepositories } from "../../services/github.js"
 import {
   ALL_PROJECT_CATEGORIES,
   ALL_PROJECT_LANGUAGES,
+  ALL_PROJECT_STATUSES,
   prepareRepositories,
   getProjectCategoryCounts,
   getProjectLanguages,
   getProjectLanguageCounts,
+  getProjectStatusCounts,
+  isProjectCategory,
+  isProjectStatus,
   filterRepositoriesByCategory,
   filterRepositoriesByLanguage,
+  filterRepositoriesByStatus,
 } from "./repository.js";
 import { createProjectsView } from "./view.js";
 
@@ -20,6 +25,10 @@ export const initProjects = () => {
   const projectFilters = document.querySelector("[data-project-filters]");
   const projectCategoryFilters = document.querySelector("[data-project-category-filters]");
   const projectLanguageFilters = document.querySelector("[data-project-language-filters]");
+  const projectStatusFilters = document.querySelector("[data-project-status-filters]");
+  const projectCategoryShortcuts = document.querySelectorAll(
+    "[data-project-category-shortcut]",
+  );
 
   if (!projectList) {
     return;
@@ -32,6 +41,7 @@ export const initProjects = () => {
     errorType: null,
     selectedCategory: ALL_PROJECT_CATEGORIES,
     selectedLanguage: ALL_PROJECT_LANGUAGES,
+    selectedStatus: ALL_PROJECT_STATUSES,
   };
 
   const view = createProjectsView({
@@ -42,34 +52,49 @@ export const initProjects = () => {
     projectFilters,
     projectCategoryFilters,
     projectLanguageFilters,
+    projectStatusFilters,
     fallbackUrl: GITHUB_PROFILE_URL,
   });
 
   // 상태에서 화면 출력용 파생 데이터 생성
   const renderProjects = () => {
-    const { status, repositories, errorType, selectedCategory, selectedLanguage } =
-      projectState;
+    const {
+      status,
+      repositories,
+      errorType,
+      selectedCategory,
+      selectedLanguage,
+      selectedStatus,
+    } = projectState;
     const categoryRepositories = filterRepositoriesByCategory(
       repositories,
       selectedCategory,
     );
-    const filteredRepositories = filterRepositoriesByLanguage(
+    const languageRepositories = filterRepositoriesByLanguage(
       categoryRepositories,
       selectedLanguage,
     );
+    const filteredRepositories = filterRepositoriesByStatus(
+      languageRepositories,
+      selectedStatus,
+    );
     const categoryCounts = getProjectCategoryCounts(repositories);
     const languageCounts = getProjectLanguageCounts(categoryRepositories);
+    const statusCounts = getProjectStatusCounts(languageRepositories);
 
     view.render({
       status,
       errorType,
       selectedCategory,
       selectedLanguage,
+      selectedStatus,
       filteredRepositories,
       repositoryCount: repositories.length,
       categoryRepositoryCount: categoryRepositories.length,
+      languageRepositoryCount: languageRepositories.length,
       categoryCounts,
       languageCounts,
+      statusCounts,
     });
   };
 
@@ -97,6 +122,7 @@ export const initProjects = () => {
     projectState.errorType = null;
     projectState.selectedCategory = ALL_PROJECT_CATEGORIES;
     projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
+    projectState.selectedStatus = ALL_PROJECT_STATUSES;
     renderProjects();
 
     try {
@@ -136,45 +162,69 @@ export const initProjects = () => {
         return;
       }
 
-      const isKnownCategory =
-        projectFilter === ALL_PROJECT_CATEGORIES ||
-        getProjectCategoryCounts(projectState.repositories).some(
-          ({ category }) => category === projectFilter,
-        );
-
-      if (!isKnownCategory) {
+      if (!isProjectCategory(projectFilter)) {
         return;
       }
 
       projectState.selectedCategory = projectFilter;
       projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
+      projectState.selectedStatus = ALL_PROJECT_STATUSES;
       renderProjects();
       view.focusFilter("category", projectState.selectedCategory);
       return;
     }
 
+    if (projectFilterType === "language") {
+      if (projectFilter === projectState.selectedLanguage) {
+        return;
+      }
+
+      const categoryRepositories = filterRepositoriesByCategory(
+        projectState.repositories,
+        projectState.selectedCategory,
+      );
+      const isKnownLanguage =
+        projectFilter === ALL_PROJECT_LANGUAGES ||
+        getProjectLanguages(categoryRepositories).includes(projectFilter);
+
+      if (!isKnownLanguage) {
+        return;
+      }
+
+      projectState.selectedLanguage = projectFilter;
+      projectState.selectedStatus = ALL_PROJECT_STATUSES;
+      renderProjects();
+      view.focusFilter("language", projectState.selectedLanguage);
+      return;
+    }
+
     if (
-      projectFilterType !== "language" ||
-      projectFilter === projectState.selectedLanguage
+      projectFilterType !== "status" ||
+      projectFilter === projectState.selectedStatus ||
+      !isProjectStatus(projectFilter)
     ) {
       return;
     }
 
-    const categoryRepositories = filterRepositoriesByCategory(
-      projectState.repositories,
-      projectState.selectedCategory,
-    );
-    const isKnownLanguage =
-      projectFilter === ALL_PROJECT_LANGUAGES ||
-      getProjectLanguages(categoryRepositories).includes(projectFilter);
-
-    if (!isKnownLanguage) {
-      return;
-    }
-
-    projectState.selectedLanguage = projectFilter;
+    projectState.selectedStatus = projectFilter;
     renderProjects();
-    view.focusFilter("language", projectState.selectedLanguage);
+    view.focusFilter("status", projectState.selectedStatus);
+  });
+
+  // Hero 분야 카드와 상위 필터 상태 연결
+  projectCategoryShortcuts.forEach((shortcut) => {
+    shortcut.addEventListener("click", () => {
+      const { projectCategoryShortcut } = shortcut.dataset;
+
+      if (!projectCategoryShortcut || !isProjectCategory(projectCategoryShortcut)) {
+        return;
+      }
+
+      projectState.selectedCategory = projectCategoryShortcut;
+      projectState.selectedLanguage = ALL_PROJECT_LANGUAGES;
+      projectState.selectedStatus = ALL_PROJECT_STATUSES;
+      renderProjects();
+    });
   });
 
   projectRetryButton?.addEventListener("click", loadProjects);
