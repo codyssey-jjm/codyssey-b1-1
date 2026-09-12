@@ -17,20 +17,6 @@
   gap: var(--space-6);
 }
 
-.site-footer__signature {
-  position: absolute;
-  right: var(--page-gutter);
-  bottom: -0.25em;
-  max-width: 100%;
-  color: transparent;
-  font-family: var(--font-display);
-  font-size: clamp(2.8rem, 14vw, 8rem);
-  letter-spacing: -0.07em;
-  line-height: 0.7;
-  white-space: nowrap;
-  -webkit-text-stroke: 0.025em var(--color-text);
-}
-
 /* 태블릿 레이아웃 */
 @media (min-width: 48rem) {
   .site-footer {
