@@ -1,4 +1,11 @@
-import { ALL_PROJECT_LANGUAGES, getProjectLanguage } from "./repository.js";
+import {
+  ALL_PROJECT_CATEGORIES,
+  ALL_PROJECT_LANGUAGES,
+  getProjectCategory,
+  getProjectCategoryLabel,
+  getProjectLanguage,
+  getProjectStack,
+} from "./repository.js";
 
 // 프로젝트 상태 클래스와 외부 문자열 치환표
 const PROJECT_STATUS_CLASSES = ["is-loading", "is-success", "is-empty", "is-error"];
@@ -47,23 +54,32 @@ const createProjectCard = (repository, fallbackUrl) => {
 
   const projectName = String(name).trim() || "Untitled";
   const projectDescription = description || "프로젝트 설명이 아직 등록되지 않았습니다.";
+  const projectCategory = getProjectCategory(repository);
+  const projectCategoryLabel = getProjectCategoryLabel(projectCategory);
   const projectLanguage = getProjectLanguage(repository);
+  const projectStack = getProjectStack(repository);
   const projectInitial = [...projectName][0]?.toUpperCase() ?? "?";
   const projectUrl = getSafeGitHubUrl(htmlUrl, fallbackUrl);
   const formattedStarCount = Number.isFinite(starCount) ? starCount : 0;
+  const projectStackMarkup = projectStack
+    .map((technology) => `<li>${escapeHTML(technology)}</li>`)
+    .join("");
 
   return `
-    <article class="project-card" role="listitem">
+    <article class="project-card project-card--${projectCategory}" role="listitem">
       <div class="project-card__cover" aria-hidden="true">
         <span>${escapeHTML(projectInitial)}</span>
       </div>
       <div class="project-card__body">
         <div class="project-card__meta">
+          <span class="project-card__category">${escapeHTML(projectCategoryLabel)}</span>
           <span>${escapeHTML(projectLanguage)}</span>
-          <span>PUBLIC REPOSITORY</span>
         </div>
         <h3 class="project-card__title">${escapeHTML(projectName)}</h3>
         <p class="project-card__description">${escapeHTML(projectDescription)}</p>
+        <ul class="project-card__stack" aria-label="기술 스택">
+          ${projectStackMarkup}
+        </ul>
         <footer class="project-card__footer">
           <span aria-label="별 ${formattedStarCount}개">★ ${formattedStarCount}</span>
           <span>${escapeHTML(formatProjectDate(updatedAt))}</span>
@@ -89,12 +105,15 @@ export const createProjectsView = ({
   projectList,
   projectRetryButton,
   projectFilters,
+  projectCategoryFilters,
+  projectLanguageFilters,
   fallbackUrl,
 }) => {
   // 요청·필터 상태별 안내 문구 결정
   const getProjectStatusMessage = ({
     status,
     errorType,
+    selectedCategory,
     selectedLanguage,
     filteredRepositories,
   }) => {
@@ -104,14 +123,22 @@ export const createProjectsView = ({
 
     if (status === "success") {
       if (filteredRepositories.length === 0) {
-        return "선택한 언어에 해당하는 프로젝트가 없습니다.";
+        return "선택한 개발 분야에 해당하는 프로젝트가 없습니다.";
       }
 
-      if (selectedLanguage === ALL_PROJECT_LANGUAGES) {
+      const categoryLabel =
+        selectedCategory === ALL_PROJECT_CATEGORIES
+          ? ""
+          : getProjectCategoryLabel(selectedCategory);
+      const languageLabel =
+        selectedLanguage === ALL_PROJECT_LANGUAGES ? "" : selectedLanguage;
+      const filterLabel = [categoryLabel, languageLabel].filter(Boolean).join(" · ");
+
+      if (!filterLabel) {
         return `${filteredRepositories.length}개의 프로젝트를 불러왔습니다.`;
       }
 
-      return `${selectedLanguage} 프로젝트 ${filteredRepositories.length}개를 표시하고 있습니다.`;
+      return `${filterLabel} 프로젝트 ${filteredRepositories.length}개를 표시하고 있습니다.`;
     }
 
     if (status === "empty") {
@@ -173,24 +200,22 @@ export const createProjectsView = ({
         : "";
   };
 
-  // 언어별 개수와 선택 상태를 포함한 필터 버튼 생성
-  const createProjectFilterButton = (language, count, selectedLanguage) => {
+  // 분야별 개수와 선택 상태를 포함한 필터 버튼 생성
+  const createProjectFilterButton = ({ type, value, labelText, count, isActive }) => {
     const button = document.createElement("button");
     const label = document.createElement("span");
     const countBadge = document.createElement("span");
-    const isAllLanguages = language === ALL_PROJECT_LANGUAGES;
-    const displayLanguage = isAllLanguages ? "All" : language;
-    const isActive = selectedLanguage === language;
 
-    button.className = "project-filter";
+    button.className = `project-filter project-filter--${type}`;
     button.type = "button";
-    button.dataset.projectFilter = language;
+    button.dataset.projectFilter = value;
+    button.dataset.projectFilterType = type;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
-    button.setAttribute("aria-label", `${displayLanguage} 프로젝트 ${count}개`);
+    button.setAttribute("aria-label", `${labelText} 프로젝트 ${count}개`);
 
     label.className = "project-filter__label";
-    label.textContent = displayLanguage;
+    label.textContent = labelText;
 
     countBadge.className = "project-filter__count";
     countBadge.textContent = String(count);
@@ -200,37 +225,79 @@ export const createProjectsView = ({
     return button;
   };
 
-  // 현재 저장소 언어 구성을 기준으로 필터 목록 재생성
+  // 현재 저장소 구성을 기준으로 상·하위 필터 목록 재생성
   const renderProjectFilters = ({
     status,
     repositoryCount,
+    categoryRepositoryCount,
+    categoryCounts,
     languageCounts,
+    selectedCategory,
     selectedLanguage,
   }) => {
-    if (!projectFilters) {
+    if (!projectFilters || !projectCategoryFilters || !projectLanguageFilters) {
       return;
     }
 
     const shouldShowFilters = status === "success" && repositoryCount > 0;
 
     projectFilters.hidden = !shouldShowFilters;
-    projectFilters.replaceChildren();
+    projectCategoryFilters.replaceChildren();
+    projectLanguageFilters.replaceChildren();
 
     if (!shouldShowFilters) {
       return;
     }
 
-    const fragment = document.createDocumentFragment();
+    const categoryFragment = document.createDocumentFragment();
+    const languageFragment = document.createDocumentFragment();
 
-    fragment.append(
-      createProjectFilterButton(ALL_PROJECT_LANGUAGES, repositoryCount, selectedLanguage),
+    categoryFragment.append(
+      createProjectFilterButton({
+        type: "category",
+        value: ALL_PROJECT_CATEGORIES,
+        labelText: getProjectCategoryLabel(ALL_PROJECT_CATEGORIES),
+        count: repositoryCount,
+        isActive: selectedCategory === ALL_PROJECT_CATEGORIES,
+      }),
+    );
+
+    categoryCounts.forEach(({ category, label, count }) => {
+      categoryFragment.append(
+        createProjectFilterButton({
+          type: "category",
+          value: category,
+          labelText: label,
+          count,
+          isActive: selectedCategory === category,
+        }),
+      );
+    });
+
+    languageFragment.append(
+      createProjectFilterButton({
+        type: "language",
+        value: ALL_PROJECT_LANGUAGES,
+        labelText: "전체 언어",
+        count: categoryRepositoryCount,
+        isActive: selectedLanguage === ALL_PROJECT_LANGUAGES,
+      }),
     );
 
     languageCounts.forEach(({ language, count }) => {
-      fragment.append(createProjectFilterButton(language, count, selectedLanguage));
+      languageFragment.append(
+        createProjectFilterButton({
+          type: "language",
+          value: language,
+          labelText: language,
+          count,
+          isActive: selectedLanguage === language,
+        }),
+      );
     });
 
-    projectFilters.append(fragment);
+    projectCategoryFilters.append(categoryFragment);
+    projectLanguageFilters.append(languageFragment);
   };
 
   // 상태 패널·필터·카드 목록의 일괄 화면 갱신
@@ -241,13 +308,15 @@ export const createProjectsView = ({
   };
 
   // 필터 목록 재생성 후 활성 버튼으로 포커스 복귀
-  const focusFilter = (selectedLanguage) => {
+  const focusFilter = (filterType, selectedFilter) => {
     if (!projectFilters) {
       return;
     }
 
     const activeFilterButton = [...projectFilters.querySelectorAll("[data-project-filter]")].find(
-      (button) => button.dataset.projectFilter === selectedLanguage,
+      (button) =>
+        button.dataset.projectFilterType === filterType &&
+        button.dataset.projectFilter === selectedFilter,
     );
 
     activeFilterButton?.focus();

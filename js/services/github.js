@@ -1,11 +1,15 @@
 // GitHub 저장소 요청 설정
 const GITHUB_USERNAME = "jungmyung16";
+const GITHUB_ORGANIZATION = "gameDev-graphics-Lab";
 export const GITHUB_PROFILE_URL = `https://github.com/${GITHUB_USERNAME}`;
-const GITHUB_API_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&direction=desc&per_page=12&type=owner`;
+const GITHUB_API_URLS = [
+  `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&direction=desc&per_page=100&type=owner`,
+  `https://api.github.com/orgs/${GITHUB_ORGANIZATION}/repos?sort=updated&direction=desc&per_page=100&type=public`,
+];
 
-// GitHub 저장소 원본 목록 요청과 응답 형식 검증
-export const fetchRepositories = async () => {
-  const response = await fetch(GITHUB_API_URL, {
+// 단일 소유자의 저장소 목록 요청과 응답 형식 검증
+const fetchRepositorySource = async (apiUrl) => {
+  const response = await fetch(apiUrl, {
     headers: {
       Accept: "application/vnd.github+json",
     },
@@ -25,4 +29,13 @@ export const fetchRepositories = async () => {
   }
 
   return responseData;
+};
+
+// 사용자·조직 저장소 목록의 병렬 요청과 병합
+export const fetchRepositories = async () => {
+  const repositoriesBySource = await Promise.all(
+    GITHUB_API_URLS.map(fetchRepositorySource),
+  );
+
+  return repositoriesBySource.flat();
 };
