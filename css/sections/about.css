@@ -6,6 +6,8 @@
 
 .about__portrait {
   position: relative;
+  width: min(100%, 20rem);
+  align-self: center;
 }
 
 .about__portrait::after {
@@ -20,10 +22,11 @@
 }
 
 .about__portrait img {
-  width: min(100%, 32rem);
+  width: 100%;
+  height: min(18rem, 70vw);
   border: 0.125rem solid var(--color-text);
-  aspect-ratio: 4 / 5;
   object-fit: cover;
+  object-position: center 25%;
 }
 
 .about__portrait figcaption {
