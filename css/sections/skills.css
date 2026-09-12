@@ -1,71 +1,122 @@
-/* 기술 목록과 상호작용 */
-.skills__list {
-  border-bottom: 0.125rem solid var(--color-text);
-}
-
-.skills__item {
+/* 기술 카테고리 카드와 배지 */
+.skills__grid {
   display: grid;
-  grid-template-columns: 2.5rem 1fr;
-  gap: var(--space-2) var(--space-4);
-  align-items: baseline;
-  border-top: 0.125rem solid var(--color-text);
-  padding: var(--space-6) var(--space-2);
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 1fr;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 14rem;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0.125rem solid var(--color-text);
+  padding: var(--space-6);
+  background: var(--color-surface);
   transition:
-    background-color var(--transition-fast) ease,
-    color var(--transition-fast) ease;
+    transform var(--transition-fast) var(--ease-out),
+    box-shadow var(--transition-fast) var(--ease-out);
 }
 
-.skills__number {
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
+.skill-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3.5rem;
+  height: 0.45rem;
+  background: var(--color-cyan);
+  content: "";
 }
 
-.skills__item strong {
+.skill-card:nth-child(3n + 2)::before {
+  background: var(--color-orange);
+}
+
+.skill-card:nth-child(3n)::before {
+  background: var(--color-accent);
+}
+
+.skill-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.skill-card__header h3 {
+  margin: 0;
   overflow-wrap: anywhere;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 9vw, 4rem);
+  font-size: clamp(1.8rem, 7vw, 3.25rem);
   font-weight: 400;
   letter-spacing: -0.05em;
-  line-height: 1;
-  transition: transform var(--transition-fast) var(--ease-out);
+  line-height: 0.95;
 }
 
-.skills__item > span:last-child {
-  grid-column: 2;
-  max-width: 34rem;
+.skill-card__number {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.skill-card > p {
+  max-width: 36rem;
+  margin-top: var(--space-6);
   color: var(--color-muted);
   font-size: 0.9rem;
-  transition: color var(--transition-fast) ease;
+}
+
+.skill-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: auto 0 0;
+  padding: var(--space-8) 0 0;
+  list-style: none;
+}
+
+.skill-card__tags li {
+  border: 1px solid var(--color-line);
+  padding: 0.4rem 0.55rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 /* 태블릿 레이아웃 */
 @media (min-width: 48rem) {
-  .skills__item {
-    grid-template-columns: 4rem minmax(12rem, 1fr) minmax(16rem, 0.8fr);
-    gap: var(--space-6);
-    padding: var(--space-8) var(--space-4);
+  .skills__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
 
-  .skills__item > span:last-child {
-    grid-column: 3;
+/* 데스크톱 레이아웃 */
+@media (min-width: 64rem) {
+  .skills__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 /* hover 지원 환경의 상호작용 */
 @media (hover: hover) {
-  .skills__item:hover,
-  .skills__item:focus-within {
+  .skill-card:hover {
+    transform: translate(-0.25rem, -0.25rem);
+    box-shadow: var(--shadow-hard);
+  }
+
+  .skill-card:hover .skill-card__tags li {
+    border-color: var(--color-text);
     background: var(--color-accent);
-    color: var(--color-accent-text);
-  }
-
-  .skills__item:hover strong,
-  .skills__item:focus-within strong {
-    transform: translateX(var(--space-2));
-  }
-
-  .skills__item:hover > span:last-child,
-  .skills__item:focus-within > span:last-child {
     color: var(--color-accent-text);
   }
 }
