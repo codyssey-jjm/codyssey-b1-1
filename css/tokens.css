@@ -97,7 +97,7 @@
   --page-gutter: 1.25rem;
   --content-width: 90rem;
   --header-height: 4.5rem;
-  --section-space: 5rem;
+  --section-space: 3rem;
   --border: 1px solid var(--color-line);
   --shadow-hard: 0.5rem 0.5rem 0 var(--color-text);
   --transition-fast: 180ms;
@@ -138,7 +138,7 @@
 @media (min-width: 48rem) {
   :root {
     --page-gutter: 2.5rem;
-    --section-space: 7rem;
+    --section-space: 4rem;
   }
 }
 
@@ -147,6 +147,6 @@
   :root {
     --page-gutter: clamp(3rem, 6vw, 6rem);
     --header-height: 5rem;
-    --section-space: 9rem;
+    --section-space: 5rem;
   }
 }

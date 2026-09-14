@@ -5,7 +5,7 @@
   align-content: center;
   gap: var(--space-12);
   padding-top: calc(var(--header-height) + var(--space-12));
-  padding-bottom: var(--space-16);
+  padding-bottom: var(--space-8);
 }
 
 .hero__content {
@@ -201,13 +201,13 @@
 /* 태블릿 레이아웃 */
 @media (min-width: 48rem) {
   .hero {
-    padding-bottom: var(--space-24);
+    padding-bottom: var(--space-8);
   }
 
   .hero-collage {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-8) var(--space-6);
-    padding-block: var(--space-6) var(--space-12);
+    padding-block: var(--space-6) var(--space-4);
   }
 
   .hero-collage__item {
