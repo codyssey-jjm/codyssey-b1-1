@@ -110,6 +110,46 @@ body.menu-open {
   letter-spacing: 0;
 }
 
+/* 모바일 메뉴 항목의 강조 효과 */
+@media (max-width: 63.999rem) {
+  .site-nav__menu a {
+    position: relative;
+    isolation: isolate;
+    padding-inline: var(--space-3);
+    transition: color var(--transition-fast) ease;
+  }
+
+  .site-nav__menu a::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: var(--color-accent);
+    content: "";
+    transition: transform var(--transition-panel) var(--ease-out);
+  }
+
+  .site-nav__menu a span {
+    transition: transform var(--transition-fast) var(--ease-out);
+  }
+
+  .site-nav__menu a:focus-visible,
+  .site-nav__menu a:active {
+    color: var(--color-accent-text);
+  }
+
+  .site-nav__menu a:focus-visible::before,
+  .site-nav__menu a:active::before {
+    transform: scaleX(1);
+  }
+
+  .site-nav__menu a:focus-visible span,
+  .site-nav__menu a:active span {
+    transform: translateX(var(--space-2));
+  }
+}
+
 .site-nav__actions {
   position: relative;
   z-index: 2;
@@ -229,5 +269,34 @@ body.menu-open {
   .site-nav__menu a:hover::after,
   .site-nav__menu a:focus-visible::after {
     transform: scaleX(1);
+  }
+}
+
+/* hover를 지원하는 모바일 너비 환경의 메뉴 강조 */
+@media (hover: hover) and (max-width: 63.999rem) {
+  .site-nav__menu a:hover {
+    color: var(--color-accent-text);
+  }
+
+  .site-nav__menu a:hover::before {
+    transform: scaleX(1);
+  }
+
+  .site-nav__menu a:hover span {
+    transform: translateX(var(--space-2));
+  }
+}
+
+/* 모션 감소 설정의 대체 표현 */
+@media (prefers-reduced-motion: reduce) and (max-width: 63.999rem) {
+  .site-nav__menu a::before,
+  .site-nav__menu a span {
+    transition: none;
+  }
+
+  .site-nav__menu a:hover span,
+  .site-nav__menu a:focus-visible span,
+  .site-nav__menu a:active span {
+    transform: none;
   }
 }
