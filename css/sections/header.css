@@ -11,19 +11,33 @@ body.menu-open {
   left: 0;
   min-width: 20rem;
   border-bottom: 1px solid transparent;
-  transition:
-    background-color var(--transition-panel) ease,
-    border-color var(--transition-panel) ease,
-    backdrop-filter var(--transition-panel) ease;
+  transition: border-color var(--transition-panel) ease;
+}
+
+.site-header::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+  -webkit-backdrop-filter: blur(0.75rem);
+  backdrop-filter: blur(0.75rem);
+  opacity: 0;
+  pointer-events: none;
+  content: "";
+  transition: opacity var(--transition-panel) ease;
 }
 
 .site-header.is-scrolled {
   border-color: var(--color-line);
-  background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-  backdrop-filter: blur(0.75rem);
+}
+
+.site-header.is-scrolled::before {
+  opacity: 1;
 }
 
 .site-nav {
+  position: relative;
+  z-index: 1;
   display: flex;
   min-height: var(--header-height);
   align-items: center;
