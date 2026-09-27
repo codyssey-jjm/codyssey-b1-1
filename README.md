@@ -2,9 +2,8 @@
 
 순수 HTML, CSS, JavaScript로 제작한 반응형 개발자 포트폴리오이다. 자기소개와 기술 스택, GitHub 프로젝트 목록, 문의 폼을 제공한다. 사용자 이벤트 → 상태 변경 → DOM 업데이트 흐름을 직접 구현하는 것이 핵심 학습 목표이다.
 
-[포트폴리오 사이트](https://codyssey-jjm.github.io/codyssey-b1-1/)
+[Visit My Portfolio](https://codyssey-jjm.github.io/codyssey-b1-1/)
 
-배포 주소는 `index.html`의 OG 설정에 등록된 값이다. 문서 작성 시 배포 환경의 실제 동작은 검증하지 않았다.
 
 ## 대표 이미지와 스크린샷
 
@@ -48,17 +47,6 @@
 | GitHub Pages | 정적 사이트 배포 대상 |
 
 외부 UI 라이브러리와 프레임워크는 사용하지 않는다. Skills와 Projects에 표시하는 React, Spring, Flutter 등은 소개하는 역량과 개별 프로젝트의 기술이다.
-
-## 로컬 실행
-
-Node.js 의존성 설치나 별도 빌드 과정이 없는 정적 사이트이다. VS Code와 Live Server 확장을 사용하는 실행 절차이다.
-
-1. 저장소를 내려받아 VS Code에서 프로젝트 폴더를 연다.
-2. Live Server 확장을 설치한다.
-3. `index.html`에서 `Open with Live Server`를 실행한다.
-4. 열린 HTTP 주소에서 페이지를 확인한다.
-
-JavaScript 모듈을 사용하므로 `file://`로 파일을 직접 여는 방식 대신 HTTP 서버를 사용한다. API와 웹 폰트를 사용하려면 인터넷 연결이 필요하다. 확인 대상 브라우저는 미션에서 지정한 최신 Chrome이다.
 
 ## 프로젝트 구조
 
@@ -147,18 +135,6 @@ GET https://api.github.com/orgs/gameDev-graphics-Lab/repos?sort=updated&directio
 
 검증을 통과하면 `FormData`를 POST로 전송한다. 전송 중에는 중복 제출을 차단하고, 성공하면 입력값을 초기화한다. 실패하면 입력값을 유지하고 재전송할 수 있도록 한다. 화면의 성공 메시지는 HTTP 성공 응답을 기준으로 하며 실제 메일 수신까지 확인한 결과는 아니다.
 
-## 내용 변경 위치
-
-| 변경 항목 | 수정 위치 |
-| --- | --- |
-| 이름·소개·기술·연락처·소셜 링크 | `index.html` |
-| 프로필 이미지 | `images/`의 이미지와 `index.html`의 `src`, `alt` |
-| 색상·폰트·간격·테마 | `css/tokens.css` |
-| GitHub 사용자·조직 | `js/services/github.js` |
-| 표시 저장소·분야·기술 태그·진행 상태 | `js/features/projects/repository.js` |
-| 문의 전송 주소 | `index.html`의 폼 `action` |
-| 배포 주소·OG 메타데이터 | `index.html`과 `README.md` |
-
 ## 배포와 제출 확인
 
 배포 대상은 GitHub Pages이다. 빌드 산출물 대신 `index.html`과 CSS·JavaScript·이미지 파일을 포함한 정적 파일을 제공하는 구조이다. 실제 저장소의 Pages 게시 설정과 배포 성공 여부는 GitHub에서 확인할 항목이다.
@@ -173,7 +149,3 @@ GET https://api.github.com/orgs/gameDev-graphics-Lab/repos?sort=updated&directio
 - [ ] GitHub 로딩·성공·오류·빈 상태, 필터와 재시도를 확인한다.
 - [ ] 폼 검증·전송 실패 시 입력 유지·전송 성공과 실제 메일 수신을 확인한다.
 - [ ] 데스크톱·모바일·다크 모드 스크린샷을 추가한다.
-
-현재 프로필은 자리 표시자 이미지이고 Footer의 GitHub 링크는 GitHub 첫 화면이다. 실제 소개 자료로 제출하기 전에 확인할 항목이다.
-
-이 문서는 현재 소스 코드를 기준으로 작성한 것이다. 문서 작성 과정에서 빌드·테스트·실제 문의 전송은 수행하지 않았다.
