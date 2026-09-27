@@ -4,9 +4,6 @@
 
 [Visit My Portfolio](https://codyssey-jjm.github.io/codyssey-b1-1/)
 
-
-## 대표 이미지와 스크린샷
-
 ![포트폴리오 OG 대표 이미지](images/og-image.png)
 
 ## 주요 기능
