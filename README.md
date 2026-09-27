@@ -1,10 +1,8 @@
-# JANG JUNG MYUNG 포트폴리오
+## JungMyung Jang Portfolio 👋
 
 순수 HTML, CSS, JavaScript로 제작한 반응형 개발자 포트폴리오이다. 자기소개와 기술 스택, GitHub 프로젝트 목록, 문의 폼을 제공한다. 사용자 이벤트 → 상태 변경 → DOM 업데이트 흐름을 직접 구현하는 것이 핵심 학습 목표이다.
 
-- [배포 사이트](https://codyssey-jjm.github.io/codyssey-b1-1/)
-- [GitHub 저장소](https://github.com/codyssey-jjm/codyssey-b1-1)
-- [미션 기준 프로젝트 설명](review.md)
+[포트폴리오 사이트](https://codyssey-jjm.github.io/codyssey-b1-1/)
 
 배포 주소는 `index.html`의 OG 설정에 등록된 값이다. 문서 작성 시 배포 환경의 실제 동작은 검증하지 않았다.
 
